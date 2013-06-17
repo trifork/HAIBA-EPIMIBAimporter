@@ -1,0 +1,11 @@
+*.iml
+*.ipr
+*.iws
+.idea
+.settings
+.project
+.classpath
+target
+*/target
+forretningsregel-fejl.log
+.DS_Store
