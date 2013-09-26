@@ -27,6 +27,7 @@
 package dk.nsi.haiba.epimibaimporter.importer;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -35,7 +36,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
 import dk.nsi.haiba.epimibaimporter.log.Log;
+import dk.nsi.haiba.epimibaimporter.model.Header;
+import dk.nsi.haiba.epimibaimporter.model.Isolate;
+import dk.nsi.haiba.epimibaimporter.model.Quantitative;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepository;
+import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
+import dk.nsi.stamdata.jaxws.generated.Answer;
+import dk.nsi.stamdata.jaxws.generated.ArrayOfPIsolate;
+import dk.nsi.stamdata.jaxws.generated.ArrayOfPQuantitative;
+import dk.nsi.stamdata.jaxws.generated.PIsolate;
+import dk.nsi.stamdata.jaxws.generated.PQuantitative;
 
 /*
  * Scheduled job, responsible for fetching new data from LPR, then send it to the RulesEngine for further processing
@@ -52,13 +62,16 @@ public class ImportExecutor {
 	@Autowired
 	ImportStatusRepository statusRepo;
 	
+	@Autowired
+	EpimibaWebserviceClient epimibaWebserviceClient;
+
 	@Scheduled(cron = "${cron.import.job}")
 	public void run() {
 		if(!isManualOverride()) {
-			log.trace("Running Importer: " + new Date().toString());
+			log.debug("Running Importer: " + new Date().toString());
 			doProcess();
 		} else {
-			log.trace("Importer must be started manually");
+			log.debug("Importer must be started manually");
 		}
 	}
 
@@ -70,14 +83,82 @@ public class ImportExecutor {
 		try {
 			statusRepo.importStartedAt(new DateTime());
 			
-			// TODO Insert body here
-			
+			boolean hasAnswers = true;
+
+			while(hasAnswers) {
+	        	long latestTransactionId = haibaDao.getLatestTransactionId();
+	        	List<Answer> answers = epimibaWebserviceClient.getBakteriaemi(latestTransactionId);
+	        	if(answers == null || answers.size() == 0) {
+	        		log.debug("No more answers on Bakteriaemi");
+	        		hasAnswers = false;
+	        	} else {
+			        for (Answer answer : answers) {
+			        	log.debug(answer.getCprnr());
+			        	Header header = getHeader(answer);
+			        	haibaDao.saveBakteriaemi(header, answer.getTransactionID().longValue());
+					}
+	        	}
+			}
+	        
 			statusRepo.importEndedWithSuccess(new DateTime());
 			
 		} catch(Exception e) {
 			log.error("", e);
 			statusRepo.importEndedWithFailure(new DateTime(), e.getMessage());
 		}
+	}
+	
+	private Header getHeader(Answer answer) {
+		
+		Header h = new Header();
+		h.setHeaderId(answer.getHeaderId());
+		// h.setAlnr() - TODO not found in answer
+		h.setAvd(answer.getAvd());
+		h.setCprnr(answer.getCprnr().replace("-", ""));
+		h.setEvaluationText(answer.getEvaluationText());
+		h.setExtid(answer.getExtId());
+		if(answer.getIndate() != null) {
+			h.setInDate(answer.getIndate().toGregorianCalendar().getTime());
+		}
+		h.setLabnr(""+answer.getLabnr());
+		h.setLar(""+answer.getLar());
+		h.setMgkod(answer.getMgkod());
+		h.setPname(answer.getPname());
+		if(answer.getPrdate() != null) {
+			h.setPrDate(answer.getPrdate().toGregorianCalendar().getTime());
+		}
+    	h.setRefnr(answer.getRefnr());
+		h.setResult(answer.getResult());
+		// h.setStnr()  - TODO not found in answer
+		h.setUsnr(answer.getUsnr());
+		
+		ArrayOfPIsolate isolates = answer.getIsolates();
+		List<PIsolate> pIsolate = isolates.getPIsolate();
+		log.debug("Adding "+pIsolate.size()+" isolates");
+		for (PIsolate isolate : pIsolate) {
+			Isolate i = new Isolate();
+			i.setIsolateId(isolate.getIsolateId());
+			i.setQuantity(isolate.getIsolateQuantity());
+			log.debug("Adding isolate: " + isolate.getIsolateId());
+			h.addIsolate(i);
+		}
+		
+		ArrayOfPQuantitative quantitatives = answer.getQuantitatives();
+		List<PQuantitative> pQuantitative = quantitatives.getPQuantitative();
+		log.debug("Adding "+pQuantitative.size()+" quantitatives");
+		for (PQuantitative quantitative : pQuantitative) {
+			Quantitative q = new Quantitative();
+			q.setQuantitativeId(quantitative.getQuantitativeId());
+			q.setAnalysis(quantitative.getQuantitativeAnalysis());
+			q.setComment(quantitative.getQuantitativeComment());
+			q.setEvaluationText(quantitative.getQuantitativeEvaluationText());
+			q.setQtnr("" + quantitative.getQuantitativeQtnr()); // TODO shouldn't this be an int?
+			q.setQuantity(quantitative.getQuantitativeQuantity());
+			log.debug("Adding quantitative: " + quantitative.getQuantitativeId());
+			h.addQuantitative(q);
+		}
+		
+		return h;
 	}
 
 	public boolean isManualOverride() {

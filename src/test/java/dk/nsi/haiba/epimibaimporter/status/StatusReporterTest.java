@@ -99,7 +99,7 @@ public class StatusReporterTest {
 
     @Test
     public void willReturn500whenHAIBADBisDown() throws Exception {
-    	Mockito.when(haibaJdbcTemplate.queryForObject("SELECT indlaeggelsesid from Indlaeggelser LIMIT 1", Long.class)).thenThrow(Exception.class);
+    	Mockito.when(haibaJdbcTemplate.queryForObject("SELECT headerid from Header LIMIT 1", Long.class)).thenThrow(Exception.class);
     	
         final ResponseEntity<String> response = reporter.reportStatus();
 

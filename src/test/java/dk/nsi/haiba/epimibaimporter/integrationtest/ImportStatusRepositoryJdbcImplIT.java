@@ -167,7 +167,7 @@ public class ImportStatusRepositoryJdbcImplIT {
 
 		// check that some open status exists (which we can then conclude must
 		// be the oldest of the two test statuses)
-		assertEquals(1, haibaJdbcTemplate.queryForInt("SELECT COUNT(*) from ImporterStatus WHERE EndTime IS NULL"));
+		assertEquals(1, haibaJdbcTemplate.queryForInt("SELECT COUNT(*) from EpimibaImporterStatus WHERE EndTime IS NULL"));
 	}
 
 	@Test

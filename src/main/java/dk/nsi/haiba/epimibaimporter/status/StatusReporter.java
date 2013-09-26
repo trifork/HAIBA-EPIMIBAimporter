@@ -38,6 +38,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import dk.nsi.haiba.epimibaimporter.importer.ImportExecutor;
+
 /*
  * This class is responsible for showing a statuspage, this page contains information about the general health of the application.
  * If it returns HTTP 200, no errors are detected
@@ -50,6 +52,9 @@ public class StatusReporter {
 	@Autowired
 	ImportStatusRepository statusRepo;
 
+	@Autowired
+	ImportExecutor importExecutor;
+
 	@Value("${cron.import.job}")
 	String cron;
 
@@ -59,27 +64,25 @@ public class StatusReporter {
 	@RequestMapping(value = "/status")
 	public ResponseEntity<String> reportStatus() {
 
-/* TODO When manual override is implemented*/		
-		
-//		String manual = request.getParameter("manual");
-//		if(manual == null || manual.trim().length() == 0) {
-//			// no value set, use default set in the import executor
-//			manual = ""+importExecutor.isManualOverride();
-//		} else {
-//			// manual flag is set on the request
-//			if(manual.equalsIgnoreCase("true")) {
-//				// flag is true, start the importer in a new thread
-//				importExecutor.setManualOverride(true);
-//		        Runnable importer = new Runnable() {
-//		            public void run() {
-//		            	importExecutor.doProcess();
-//		            }
-//		        }; 
-//		        importer.run();
-//			} else {
-//				importExecutor.setManualOverride(false);
-//			}
-//		}
+		String manual = request.getParameter("manual");
+		if(manual == null || manual.trim().length() == 0) {
+			// no value set, use default set in the import executor
+			manual = ""+importExecutor.isManualOverride();
+		} else {
+			// manual flag is set on the request
+			if(manual.equalsIgnoreCase("true")) {
+				// flag is true, start the importer in a new thread
+				importExecutor.setManualOverride(true);
+		        Runnable importer = new Runnable() {
+		            public void run() {
+		            	importExecutor.doProcess();
+		            }
+		        }; 
+		        importer.run();
+			} else {
+				importExecutor.setManualOverride(false);
+			}
+		}
 		
 		HttpHeaders headers = new HttpHeaders();
 		String body = "OK";
@@ -106,17 +109,16 @@ public class StatusReporter {
 		
 		String url = request.getRequestURL().toString();
 		
-		// TODO manual override
-//		body += "<a href=\""+url+"?manual=true\">Manual start importer</a>";
-//		body += "</br>";
-//		body += "<a href=\""+url+"?manual=false\">Scheduled start importer</a>";
-//		body += "</br>";
-//		if(manual.equalsIgnoreCase("true")) {
-//			body += "status: MANUAL";
-//		} else {
-//			// default
-//			body += "status: SCHEDULED - "+cron;
-//		}
+		body += "<a href=\""+url+"?manual=true\">Manual start importer</a>";
+		body += "</br>";
+		body += "<a href=\""+url+"?manual=false\">Scheduled start importer</a>";
+		body += "</br>";
+		if(manual.equalsIgnoreCase("true")) {
+			body += "status: MANUAL";
+		} else {
+			// default
+			body += "status: SCHEDULED - "+cron;
+		}
 
 		headers.setContentType(MediaType.TEXT_HTML);
 		

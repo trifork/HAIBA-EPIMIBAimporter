@@ -24,18 +24,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package dk.nsi.haiba.epimibaimporter.dao;
+package dk.nsi.haiba.epimibaimporter.ws;
 
-import dk.nsi.haiba.epimibaimporter.exception.DAOException;
-import dk.nsi.haiba.epimibaimporter.model.Header;
+@SuppressWarnings("serial")
+public class EpimibaWebserviceException extends RuntimeException {
+	
+	public EpimibaWebserviceException(String message) {
+		super(message);
+	}
 
-
-public interface HAIBADAO {
-
-	void saveBakteriaemi(Header header, long transactionId) throws DAOException;
-
-	void saveTransactionId(long transactionId) throws DAOException;
-
-	long getLatestTransactionId() throws DAOException;
+	public EpimibaWebserviceException(String message, Throwable t) {
+		super(message, t);
+	}
+	
+	public EpimibaWebserviceException(Throwable t) {
+		super(t.getMessage(), t);
+	}
+	
 
 }

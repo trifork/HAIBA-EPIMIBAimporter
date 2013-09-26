@@ -46,11 +46,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
 import dk.nsi.haiba.epimibaimporter.dao.impl.HAIBADAOImpl;
+import dk.nsi.haiba.epimibaimporter.importer.ImportExecutor;
 import dk.nsi.haiba.epimibaimporter.message.MessageResolver;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepository;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepositoryJdbcImpl;
 import dk.nsi.haiba.epimibaimporter.status.TimeSource;
 import dk.nsi.haiba.epimibaimporter.status.TimeSourceRealTimeImpl;
+import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
 
 /**
  * Configuration class 
@@ -71,7 +73,7 @@ public class EPIMIBAConfiguration {
 		propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(true);
 		propertySourcesPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(false);
 
-		propertySourcesPlaceholderConfigurer.setLocations(new Resource[]{new ClassPathResource("default-config.properties"), new ClassPathResource("config.properties")});
+		propertySourcesPlaceholderConfigurer.setLocations(new Resource[]{new ClassPathResource("default-config.properties"), new ClassPathResource("epimibaconfig.properties")});
 
 		return propertySourcesPlaceholderConfigurer;
 	}
@@ -110,6 +112,11 @@ public class EPIMIBAConfiguration {
 	}
 
 	@Bean
+	public ImportExecutor importExecutor() {
+		return new ImportExecutor();
+	}
+
+	@Bean
 	public TimeSource timeSource() {
 		return new TimeSourceRealTimeImpl();
 	}
@@ -132,4 +139,8 @@ public class EPIMIBAConfiguration {
         return new HAIBADAOImpl();
     }
 	
+	@Bean
+	public EpimibaWebserviceClient epimibaWebserviceClient() {
+		return new EpimibaWebserviceClient();
+	}
 }

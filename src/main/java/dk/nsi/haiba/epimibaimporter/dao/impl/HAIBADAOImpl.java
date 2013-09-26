@@ -26,14 +26,22 @@
  */
 package dk.nsi.haiba.epimibaimporter.dao.impl;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import dk.nsi.haiba.epimibaimporter.dao.CommonDAO;
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
+import dk.nsi.haiba.epimibaimporter.exception.DAOException;
 import dk.nsi.haiba.epimibaimporter.log.Log;
+import dk.nsi.haiba.epimibaimporter.model.Header;
+import dk.nsi.haiba.epimibaimporter.model.Isolate;
+import dk.nsi.haiba.epimibaimporter.model.Quantitative;
 
 public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
 
@@ -43,4 +51,99 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
 	@Qualifier("haibaJdbcTemplate")
 	JdbcTemplate jdbc;
 
+	@Override
+	public void saveBakteriaemi(Header header, long transactionId) throws DAOException {
+
+		try {
+			log.debug("* Inserting Header");
+
+			String sql = "INSERT INTO Header (HeaderId, Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, Evaluation, Usnr, Alnr, Stnr, Avd, Mgkod) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			Object[] args = new Object[] {
+				header.getHeaderId(),	
+				header.getCprnr(),
+				header.getExtid(),
+				header.getRefnr(),
+				header.getLabnr(),
+				header.getLar(),
+				header.getPname(),
+				header.getInDate(),
+				header.getPrDate(),
+				header.getResult(),
+				header.getEvaluationText(),
+				header.getUsnr(),
+				header.getAlnr(),
+				header.getStnr(),
+				header.getAvd(),
+				header.getMgkod()
+			};
+
+			jdbc.update(sql, args);
+			
+			saveIsolates(header.getIsolates(), header.getHeaderId());
+			saveQuantitatives(header.getQuantitatives(), header.getHeaderId());
+			
+			saveTransactionId(transactionId);
+			log.debug("** Inserted Header");
+		} catch (DataAccessException e) {
+			throw new DAOException(e.getMessage(), e);
+		}
+	}
+	
+	private void saveQuantitatives(List<Quantitative> quantitatives, long headerId) {
+
+		log.debug("** Inserting "+quantitatives.size()+" Quantitatives");
+		for (Quantitative q : quantitatives) {
+			
+			
+			String sql = "INSERT INTO Quantitative (QuantitativeId, Analysis, Comment, EvaluationText, Qtnr, Quantity, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+			Object[] args = new Object[] {
+				q.getQuantitativeId(),
+				q.getAnalysis(),
+				q.getComment(),
+				q.getEvaluationText(),
+				q.getQtnr(),
+				q.getQuantity(),
+				headerId
+			};
+			jdbc.update(sql, args);
+		}
+		log.debug("** Inserted Quantitatives");
+	}
+
+	private void saveIsolates(List<Isolate> isolates, long headerId) {
+
+		log.debug("** Inserting "+isolates.size()+" Isolates");
+		for (Isolate isolate : isolates) {
+
+			String sql = "INSERT INTO Isolate (IsolateId, Quantity, HeaderId) VALUES (?, ?, ?)";
+
+			Object[] args = new Object[] {
+				isolate.getIsolateId(),	
+				isolate.getQuantity(),
+				headerId
+			};
+			jdbc.update(sql, args);
+		}
+		log.debug("** Inserted Isolates");
+		
+	}
+
+	@Override
+	public void saveTransactionId(long transactionId) throws DAOException {
+
+		String sql = "INSERT INTO EpimibaTransaction (TransactionId, TransactionProcessed) VALUES (?, ?)";
+		jdbc.update(sql, transactionId, new Date());
+	}
+	
+	@Override
+	public synchronized long getLatestTransactionId() throws DAOException {
+		long transactionId = -1;
+		
+		transactionId = jdbc.queryForLong("SELECT MAX(TransactionId) AS maxId FROM EpimibaTransaction");
+		
+		return transactionId;
+	}
+	
 }

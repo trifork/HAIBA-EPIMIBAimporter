@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.ssi.dk/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://www.ssi.dk/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.ssi.dk/">
+      <s:element name="PingServer">
+        <s:complexType />
+      </s:element>
+      <s:element name="PingServerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="PingServerResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAnswersByCprs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Cprs" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAnswersByCprsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAnswersByCprsResult" type="tns:PResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Result" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="NumbOfAnswers" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Answers" type="tns:ArrayOfAnswer" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAnswer">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Answer" nillable="true" type="tns:Answer" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Answer">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="HeaderId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TransactionID" type="s:unsignedLong" />
+          <s:element minOccurs="0" maxOccurs="1" name="Operation" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Cprnr" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExtId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Refnr" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Labnr" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Lar" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Pname" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Indate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Intime" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Prdate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Prtime" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Result" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EvaluationText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Comments" type="tns:ArrayOfPComment" />
+          <s:element minOccurs="0" maxOccurs="1" name="Isolates" type="tns:ArrayOfPIsolate" />
+          <s:element minOccurs="0" maxOccurs="1" name="Quantitatives" type="tns:ArrayOfPQuantitative" />
+          <s:element minOccurs="0" maxOccurs="1" name="InvestigationText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Usnr" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LocationAlnr" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="LocationText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SpecimenStnr" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SpecimenText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Avd" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AvdName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Mgkod" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MgkodName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Doc" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Sex" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Age" type="s:short" />
+          <s:element minOccurs="0" maxOccurs="1" name="Specification" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Status" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Utdate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="ClinAnamnesiss" type="tns:ArrayOfPClinAnamnesis" />
+          <s:element minOccurs="0" maxOccurs="1" name="Microscopys" type="tns:ArrayOfPMicroscopy" />
+          <s:element minOccurs="1" maxOccurs="1" name="CreatedInEpiMibaDb" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdatedInEpiMibaDb" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DeletedAtKma" nillable="true" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="TestPt" nillable="true" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="TabInvestigationId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TabOrganizationId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TabLabSectionId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TabLocationId" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPComment">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PComment" nillable="true" type="tns:PComment" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PComment">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="CommentId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="CommentText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPIsolate">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PIsolate" nillable="true" type="tns:PIsolate" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PIsolate">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IsolateId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="IsolateBanr" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IsolateMicroorganismName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IsolateComment" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IsolateMkComment" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IsolatePbn" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IsolateQuantity" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Resistenss" type="tns:ArrayOfPResistens" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPResistens">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PResistens" nillable="true" type="tns:PResistens" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PResistens">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ResistensId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResistensAbnr" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AntibioticsName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResistensMic" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResistensSIR" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ResistensZoneSize" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPQuantitative">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PQuantitative" nillable="true" type="tns:PQuantitative" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PQuantitative">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="QuantitativeId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeAnalysis" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeComment" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeEvaluationCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeEvaluationText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="QuantitativeQtnr" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeQuantity" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeRefInterval" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeTiterEval" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeUnit" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="QuantitativeText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPClinAnamnesis">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PClinAnamnesis" nillable="true" type="tns:PClinAnamnesis" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PClinAnamnesis">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ClinAnamnesisId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="AnamnesisText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPMicroscopy">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PMicroscopy" nillable="true" type="tns:PMicroscopy" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PMicroscopy">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="MicroscopyId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="MicroscopyQualifier" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MiText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAnswers">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="CasedefinitionId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="StartFromTransactionId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="MaxNoOfAnswers" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAnswersResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAnswersResult" type="tns:PResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDateProperties">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDatePropertiesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDatePropertiesResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetTabLabSections">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTabLabSectionsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTabLabSectionsResult" type="tns:PCodeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PCodeResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Error" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Codes" type="tns:ArrayOfPCode" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPCode">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PCode" nillable="true" type="tns:PCode" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PCode">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="MiBaCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Text" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CodeType" type="tns:Type" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="Type" abstract="true">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:MemberInfo" />
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="MemberInfo" abstract="true" />
+      <s:element name="GetResults">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetResultsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetResultsResult" type="tns:PCodeResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCasedefinitions">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCasedefinitionsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCasedefinitionsResult" type="tns:PCasedefinitionResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="PCasedefinitionResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Error" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Casedefinitions" type="tns:ArrayOfPCasedefinition" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfPCasedefinition">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PCasedefinition" nillable="true" type="tns:PCasedefinition" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PCasedefinition">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="PCasedefinitionId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Comment" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DateTimeFrom" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DateTimeTo" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="Period" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Active" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Disease" type="tns:PDisease" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PDisease">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DiseaseId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="boolean" type="s:boolean" />
+      <s:element name="PResult" nillable="true" type="tns:PResult" />
+      <s:element name="ArrayOfString" nillable="true" type="tns:ArrayOfString" />
+      <s:element name="PCodeResult" nillable="true" type="tns:PCodeResult" />
+      <s:element name="PCasedefinitionResult" nillable="true" type="tns:PCasedefinitionResult" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="PingServerSoapIn">
+    <wsdl:part name="parameters" element="tns:PingServer" />
+  </wsdl:message>
+  <wsdl:message name="PingServerSoapOut">
+    <wsdl:part name="parameters" element="tns:PingServerResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersByCprsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAnswersByCprs" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersByCprsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAnswersByCprsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAnswers" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAnswersResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDatePropertiesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDateProperties" />
+  </wsdl:message>
+  <wsdl:message name="GetDatePropertiesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDatePropertiesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTabLabSectionsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTabLabSections" />
+  </wsdl:message>
+  <wsdl:message name="GetTabLabSectionsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTabLabSectionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetResultsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetResults" />
+  </wsdl:message>
+  <wsdl:message name="GetResultsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetResultsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCasedefinitionsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetCasedefinitions" />
+  </wsdl:message>
+  <wsdl:message name="GetCasedefinitionsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetCasedefinitionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="PingServerHttpGetIn" />
+  <wsdl:message name="PingServerHttpGetOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersByCprsHttpGetIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Cprs" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersByCprsHttpGetOut">
+    <wsdl:part name="Body" element="tns:PResult" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersHttpGetIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="CasedefinitionId" type="s:string" />
+    <wsdl:part name="StartFromTransactionId" type="s:string" />
+    <wsdl:part name="MaxNoOfAnswers" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersHttpGetOut">
+    <wsdl:part name="Body" element="tns:PResult" />
+  </wsdl:message>
+  <wsdl:message name="GetDatePropertiesHttpGetIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetDatePropertiesHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfString" />
+  </wsdl:message>
+  <wsdl:message name="GetTabLabSectionsHttpGetIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetTabLabSectionsHttpGetOut">
+    <wsdl:part name="Body" element="tns:PCodeResult" />
+  </wsdl:message>
+  <wsdl:message name="GetResultsHttpGetIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetResultsHttpGetOut">
+    <wsdl:part name="Body" element="tns:PCodeResult" />
+  </wsdl:message>
+  <wsdl:message name="GetCasedefinitionsHttpGetIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetCasedefinitionsHttpGetOut">
+    <wsdl:part name="Body" element="tns:PCasedefinitionResult" />
+  </wsdl:message>
+  <wsdl:message name="PingServerHttpPostIn" />
+  <wsdl:message name="PingServerHttpPostOut">
+    <wsdl:part name="Body" element="tns:boolean" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersByCprsHttpPostIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="Cprs" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersByCprsHttpPostOut">
+    <wsdl:part name="Body" element="tns:PResult" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersHttpPostIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+    <wsdl:part name="CasedefinitionId" type="s:string" />
+    <wsdl:part name="StartFromTransactionId" type="s:string" />
+    <wsdl:part name="MaxNoOfAnswers" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetAnswersHttpPostOut">
+    <wsdl:part name="Body" element="tns:PResult" />
+  </wsdl:message>
+  <wsdl:message name="GetDatePropertiesHttpPostIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetDatePropertiesHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfString" />
+  </wsdl:message>
+  <wsdl:message name="GetTabLabSectionsHttpPostIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetTabLabSectionsHttpPostOut">
+    <wsdl:part name="Body" element="tns:PCodeResult" />
+  </wsdl:message>
+  <wsdl:message name="GetResultsHttpPostIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetResultsHttpPostOut">
+    <wsdl:part name="Body" element="tns:PCodeResult" />
+  </wsdl:message>
+  <wsdl:message name="GetCasedefinitionsHttpPostIn">
+    <wsdl:part name="Username" type="s:string" />
+    <wsdl:part name="Password" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetCasedefinitionsHttpPostOut">
+    <wsdl:part name="Body" element="tns:PCasedefinitionResult" />
+  </wsdl:message>
+  <wsdl:portType name="WebServiceSoap">
+    <wsdl:operation name="PingServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Pings the EpiMiBa server. Returns true if ok.</wsdl:documentation>
+      <wsdl:input message="tns:PingServerSoapIn" />
+      <wsdl:output message="tns:PingServerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all samples corresponding the given parameter. Cprs: a comma separated list of cpr numbers (Ex. 1234567890,098765-4321)</wsdl:documentation>
+      <wsdl:input message="tns:GetAnswersByCprsSoapIn" />
+      <wsdl:output message="tns:GetAnswersByCprsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all samples corresponding the given parameters.&lt;br/&gt; CasedefinitionId: an integer id of an existing casedefinition (Ex. 67)&lt;br/&gt; StartFromTransactionId: a minimum transaction id that is used for finding samplees, only return samples from a transaction less than or equal to this parameter&lt;br/&gt;</wsdl:documentation>
+      <wsdl:input message="tns:GetAnswersSoapIn" />
+      <wsdl:output message="tns:GetAnswersSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all DateProperties</wsdl:documentation>
+      <wsdl:input message="tns:GetDatePropertiesSoapIn" />
+      <wsdl:output message="tns:GetDatePropertiesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all TabLabSection codes</wsdl:documentation>
+      <wsdl:input message="tns:GetTabLabSectionsSoapIn" />
+      <wsdl:output message="tns:GetTabLabSectionsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Result codes</wsdl:documentation>
+      <wsdl:input message="tns:GetResultsSoapIn" />
+      <wsdl:output message="tns:GetResultsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Casedefinitions</wsdl:documentation>
+      <wsdl:input message="tns:GetCasedefinitionsSoapIn" />
+      <wsdl:output message="tns:GetCasedefinitionsSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="WebServiceHttpGet">
+    <wsdl:operation name="PingServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Pings the EpiMiBa server. Returns true if ok.</wsdl:documentation>
+      <wsdl:input message="tns:PingServerHttpGetIn" />
+      <wsdl:output message="tns:PingServerHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all samples corresponding the given parameter. Cprs: a comma separated list of cpr numbers (Ex. 1234567890,098765-4321)</wsdl:documentation>
+      <wsdl:input message="tns:GetAnswersByCprsHttpGetIn" />
+      <wsdl:output message="tns:GetAnswersByCprsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all samples corresponding the given parameters.&lt;br/&gt; CasedefinitionId: an integer id of an existing casedefinition (Ex. 67)&lt;br/&gt; StartFromTransactionId: a minimum transaction id that is used for finding samplees, only return samples from a transaction less than or equal to this parameter&lt;br/&gt;</wsdl:documentation>
+      <wsdl:input message="tns:GetAnswersHttpGetIn" />
+      <wsdl:output message="tns:GetAnswersHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all DateProperties</wsdl:documentation>
+      <wsdl:input message="tns:GetDatePropertiesHttpGetIn" />
+      <wsdl:output message="tns:GetDatePropertiesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all TabLabSection codes</wsdl:documentation>
+      <wsdl:input message="tns:GetTabLabSectionsHttpGetIn" />
+      <wsdl:output message="tns:GetTabLabSectionsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Result codes</wsdl:documentation>
+      <wsdl:input message="tns:GetResultsHttpGetIn" />
+      <wsdl:output message="tns:GetResultsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Casedefinitions</wsdl:documentation>
+      <wsdl:input message="tns:GetCasedefinitionsHttpGetIn" />
+      <wsdl:output message="tns:GetCasedefinitionsHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="WebServiceHttpPost">
+    <wsdl:operation name="PingServer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Pings the EpiMiBa server. Returns true if ok.</wsdl:documentation>
+      <wsdl:input message="tns:PingServerHttpPostIn" />
+      <wsdl:output message="tns:PingServerHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all samples corresponding the given parameter. Cprs: a comma separated list of cpr numbers (Ex. 1234567890,098765-4321)</wsdl:documentation>
+      <wsdl:input message="tns:GetAnswersByCprsHttpPostIn" />
+      <wsdl:output message="tns:GetAnswersByCprsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all samples corresponding the given parameters.&lt;br/&gt; CasedefinitionId: an integer id of an existing casedefinition (Ex. 67)&lt;br/&gt; StartFromTransactionId: a minimum transaction id that is used for finding samplees, only return samples from a transaction less than or equal to this parameter&lt;br/&gt;</wsdl:documentation>
+      <wsdl:input message="tns:GetAnswersHttpPostIn" />
+      <wsdl:output message="tns:GetAnswersHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all DateProperties</wsdl:documentation>
+      <wsdl:input message="tns:GetDatePropertiesHttpPostIn" />
+      <wsdl:output message="tns:GetDatePropertiesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all TabLabSection codes</wsdl:documentation>
+      <wsdl:input message="tns:GetTabLabSectionsHttpPostIn" />
+      <wsdl:output message="tns:GetTabLabSectionsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Result codes</wsdl:documentation>
+      <wsdl:input message="tns:GetResultsHttpPostIn" />
+      <wsdl:output message="tns:GetResultsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Casedefinitions</wsdl:documentation>
+      <wsdl:input message="tns:GetCasedefinitionsHttpPostIn" />
+      <wsdl:output message="tns:GetCasedefinitionsHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WebServiceSoap" type="tns:WebServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="PingServer">
+      <soap:operation soapAction="http://www.ssi.dk/PingServer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <soap:operation soapAction="http://www.ssi.dk/GetAnswersByCprs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <soap:operation soapAction="http://www.ssi.dk/GetAnswers" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <soap:operation soapAction="http://www.ssi.dk/GetDateProperties" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <soap:operation soapAction="http://www.ssi.dk/GetTabLabSections" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <soap:operation soapAction="http://www.ssi.dk/GetResults" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <soap:operation soapAction="http://www.ssi.dk/GetCasedefinitions" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebServiceSoap12" type="tns:WebServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="PingServer">
+      <soap12:operation soapAction="http://www.ssi.dk/PingServer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <soap12:operation soapAction="http://www.ssi.dk/GetAnswersByCprs" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <soap12:operation soapAction="http://www.ssi.dk/GetAnswers" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <soap12:operation soapAction="http://www.ssi.dk/GetDateProperties" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <soap12:operation soapAction="http://www.ssi.dk/GetTabLabSections" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <soap12:operation soapAction="http://www.ssi.dk/GetResults" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <soap12:operation soapAction="http://www.ssi.dk/GetCasedefinitions" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebServiceHttpGet" type="tns:WebServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="PingServer">
+      <http:operation location="/PingServer" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <http:operation location="/GetAnswersByCprs" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <http:operation location="/GetAnswers" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <http:operation location="/GetDateProperties" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <http:operation location="/GetTabLabSections" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <http:operation location="/GetResults" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <http:operation location="/GetCasedefinitions" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WebServiceHttpPost" type="tns:WebServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="PingServer">
+      <http:operation location="/PingServer" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswersByCprs">
+      <http:operation location="/GetAnswersByCprs" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAnswers">
+      <http:operation location="/GetAnswers" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDateProperties">
+      <http:operation location="/GetDateProperties" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTabLabSections">
+      <http:operation location="/GetTabLabSections" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetResults">
+      <http:operation location="/GetResults" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCasedefinitions">
+      <http:operation location="/GetCasedefinitions" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WebService">
+    <wsdl:port name="WebServiceSoap" binding="tns:WebServiceSoap">
+      <soap:address location="http://epimibapsrv:8081/WebService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebServiceSoap12" binding="tns:WebServiceSoap12">
+      <soap12:address location="http://epimibapsrv:8081/WebService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebServiceHttpGet" binding="tns:WebServiceHttpGet">
+      <http:address location="http://epimibapsrv:8081/WebService.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WebServiceHttpPost" binding="tns:WebServiceHttpPost">
+      <http:address location="http://epimibapsrv:8081/WebService.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -24,18 +24,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package dk.nsi.haiba.epimibaimporter.dao;
+package dk.nsi.haiba.epimibaimporter.model;
 
-import dk.nsi.haiba.epimibaimporter.exception.DAOException;
-import dk.nsi.haiba.epimibaimporter.model.Header;
-
-
-public interface HAIBADAO {
-
-	void saveBakteriaemi(Header header, long transactionId) throws DAOException;
-
-	void saveTransactionId(long transactionId) throws DAOException;
-
-	long getLatestTransactionId() throws DAOException;
-
+public class Quantitative {
+	   long quantitativeId;
+       String analysis;
+       String comment;
+       String evaluationText;
+       String qtnr;
+       String quantity;
+       
+	public long getQuantitativeId() {
+		return quantitativeId;
+	}
+	public void setQuantitativeId(long quantitativeId) {
+		this.quantitativeId = quantitativeId;
+	}
+	public String getAnalysis() {
+		return analysis;
+	}
+	public void setAnalysis(String analysis) {
+		this.analysis = analysis;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	public String getEvaluationText() {
+		return evaluationText;
+	}
+	public void setEvaluationText(String evaluationText) {
+		this.evaluationText = evaluationText;
+	}
+	public String getQtnr() {
+		return qtnr;
+	}
+	public void setQtnr(String qtnr) {
+		this.qtnr = qtnr;
+	}
+	public String getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(String quantity) {
+		this.quantity = quantity;
+	}
 }

@@ -59,7 +59,7 @@ public class ImportStatusRepositoryJdbcImpl extends CommonDAO implements ImportS
 	@Transactional(value="haibaTransactionManager")
 	public void importStartedAt(DateTime startTime) {
 		log.debug("Starting import");
-		haibaJdbcTemplate.update("INSERT INTO ImporterStatus (StartTime) values (?)", startTime.toDate());
+		haibaJdbcTemplate.update("INSERT INTO EpimibaImporterStatus (StartTime) values (?)", startTime.toDate());
 	}
 
 	@Override
@@ -75,16 +75,19 @@ public class ImportStatusRepositoryJdbcImpl extends CommonDAO implements ImportS
 	@Transactional(value="haibaTransactionManager")
 	public void importEndedWithFailure(DateTime endTime, String errorMessage) {
 		log.debug("Import ended with failure");
+		if(errorMessage != null && errorMessage.length() > 200) {
+			errorMessage = errorMessage.substring(0, 200); // truncate to match db layout
+		}
 		importEndedAt(endTime, ImportStatus.Outcome.FAILURE, errorMessage);
 	}
 
 	private void importEndedAt(DateTime endTime, ImportStatus.Outcome outcome, String errorMessage) {
 		String sql = null;
 		if(MYSQL.equals(getDialect())) {
-			sql = "SELECT Id from ImporterStatus ORDER BY StartTime DESC LIMIT 1";
+			sql = "SELECT Id from EpimibaImporterStatus ORDER BY StartTime DESC LIMIT 1";
 		} else {
 			// MSSQL
-			sql = "SELECT Top 1 Id from ImporterStatus ORDER BY StartTime DESC";
+			sql = "SELECT Top 1 Id from EpimibaImporterStatus ORDER BY StartTime DESC";
 		}
 
 		Long newestOpenId;
@@ -95,17 +98,17 @@ public class ImportStatusRepositoryJdbcImpl extends CommonDAO implements ImportS
 			return;
 		}
 
-		haibaJdbcTemplate.update("UPDATE ImporterStatus SET EndTime=?, Outcome=?, ErrorMessage=? WHERE Id=?", endTime.toDate(), outcome.toString(), errorMessage, newestOpenId);
+		haibaJdbcTemplate.update("UPDATE EpimibaImporterStatus SET EndTime=?, Outcome=?, ErrorMessage=? WHERE Id=?", endTime.toDate(), outcome.toString(), errorMessage, newestOpenId);
 	}
 
 	@Override
 	public ImportStatus getLatestStatus() {
 		String sql = null;
 		if(MYSQL.equals(getDialect())) {
-			sql = "SELECT * from ImporterStatus ORDER BY StartTime DESC LIMIT 1";
+			sql = "SELECT * from EpimibaImporterStatus ORDER BY StartTime DESC LIMIT 1";
 		} else {
 			// MSSQL
-			sql = "SELECT Top 1 * from ImporterStatus ORDER BY StartTime DESC";
+			sql = "SELECT Top 1 * from EpimibaImporterStatus ORDER BY StartTime DESC";
 		}
 
 		try {
@@ -164,10 +167,10 @@ public class ImportStatusRepositoryJdbcImpl extends CommonDAO implements ImportS
 	public boolean isHAIBADBAlive() {
 		String sql = null;
 		if(MYSQL.equals(getDialect())) {
-			sql = "SELECT indlaeggelsesid from Indlaeggelser LIMIT 1";
+			sql = "SELECT headerid from Header LIMIT 1";
 		} else {
 			// MSSQL
-			sql = "SELECT Top 1 indlaeggelsesid from Indlaeggelser";
+			sql = "SELECT Top 1 headerid from Header";
 		}
 
 		try {

@@ -24,18 +24,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package dk.nsi.haiba.epimibaimporter.dao;
+package dk.nsi.haiba.epimibaimporter.model;
 
-import dk.nsi.haiba.epimibaimporter.exception.DAOException;
-import dk.nsi.haiba.epimibaimporter.model.Header;
+public class Isolate {
 
-
-public interface HAIBADAO {
-
-	void saveBakteriaemi(Header header, long transactionId) throws DAOException;
-
-	void saveTransactionId(long transactionId) throws DAOException;
-
-	long getLatestTransactionId() throws DAOException;
-
+	long isolateId;
+	String quantity;
+	
+	public long getIsolateId() {
+		return isolateId;
+	}
+	public void setIsolateId(long isolateId) {
+		this.isolateId = isolateId;
+	}
+	public String getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(String quantity) {
+		this.quantity = quantity;
+	}
 }

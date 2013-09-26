@@ -139,6 +139,26 @@
             <version>1.1</version>
             <scope>test</scope>
         </dependency>
+	
+		<!-- JAX-WS -->
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<version>2.1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>wstx-asl</artifactId>
+			<version>3.2.3</version>
+			<scope>provided</scope>
+		</dependency>
+        
     </dependencies>
     
   <repositories>
@@ -242,7 +262,56 @@
 			            </goals>
 			        </execution>
 			    </executions>
-			</plugin>            
+			</plugin>
+			
+			
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>jaxws-maven-plugin</artifactId>
+          <version>1.12</version>
+          <configuration>
+            <sourceDestDir>${project.build.directory}/generated-sources/jaxws</sourceDestDir>
+            <packageName>dk.nsi.stamdata.jaxws.generated</packageName>
+            <wsdlDirectory>${basedir}/src/main/webapp/WEB-INF/wsdl</wsdlDirectory>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals><goal>wsimport</goal></goals>
+            </execution>
+          </executions>
+          <!--
+           | In order to use JAX-WS 2.2, we will have to
+           | change the generator version.
+           | We still target 2.0 to avoid endorsing jar
+           | in maven which is a real pain for Eclipse and
+           | IDEA. These IDE plugins don't support it well. 
+           -->
+           <dependencies>
+           <dependency>
+              <groupId>com.sun.xml.ws</groupId>
+              <artifactId>jaxws-tools</artifactId>
+              <version>2.1.7</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.7</version>
+          <configuration>
+            <sources>
+              <source>${project.build.directory}/generated-sources/jaxws</source>
+            </sources>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals><goal>add-source</goal></goals>
+            </execution>
+          </executions>
+        </plugin>
+			            
         </plugins>
     </build>
 
