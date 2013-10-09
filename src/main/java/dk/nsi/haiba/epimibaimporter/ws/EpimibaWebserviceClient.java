@@ -33,25 +33,47 @@ import java.util.List;
 import javax.xml.namespace.QName;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 
 import dk.nsi.haiba.epimibaimporter.log.Log;
+import dk.nsi.haiba.epimibaimporter.model.Classification;
 import dk.nsi.stamdata.jaxws.generated.Answer;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfAnswer;
+import dk.nsi.stamdata.jaxws.generated.ArrayOfGenericCoding;
+import dk.nsi.stamdata.jaxws.generated.GenericCoding;
+import dk.nsi.stamdata.jaxws.generated.GenericCodingResult;
 import dk.nsi.stamdata.jaxws.generated.PResult;
 import dk.nsi.stamdata.jaxws.generated.WebService;
 import dk.nsi.stamdata.jaxws.generated.WebServiceSoap;
 
 public class EpimibaWebserviceClient {
 	
+	@Value("${epimiba.webservice.wsdl.url}")
+	String wsdlURL;
+
+	@Value("${epimiba.webservice.username}")
+	String username;
+
+	@Value("${epimiba.webservice.password}")
+	String password;
+	
+	@Value("${epimiba.casedefinitionid.bakteriaemi}")
+	int bakteriaemiId;
+	
+	@Value("${epimiba.casedefinitionid.clostridium}")
+	int clostridiumId;
+
+	@Value("${epimiba.casedefinition.batchsize}")
+	int batchSize;
+
 	private static Log log = new Log(Logger.getLogger(EpimibaWebserviceClient.class));
 
 	public List<Answer> getBakteriaemi(long latestTransactionId) {
-		return getAnswers(latestTransactionId + 1, 86);
+		return getAnswers(latestTransactionId + 1, bakteriaemiId);
 	}
 	
 	public List<Answer> getClostridium(long latestTransactionId) {
-		// TODO find ID for clostridium
-		return getAnswers(latestTransactionId + 1, 0);
+		return getAnswers(latestTransactionId + 1, clostridiumId);
 	}
 	
     List<Answer> getAnswers(long latestTransactionId, int caseDefinitionId) {
@@ -60,17 +82,13 @@ public class EpimibaWebserviceClient {
     	List<Answer> answerList = new ArrayList<Answer>();
     	
     	try {
-        	URL wsdlLocation = new URL("http://epimibapsrv:8081/WebService.asmx?wsdl");
-            QName serviceName = new QName("http://www.ssi.dk/", "WebService");
-            WebService service = new WebService(wsdlLocation, serviceName);
-        	
             // TODO - make the webservice to change this...	
             // Hack - to convert long to int as the webservice supports
             String transactionId = ""+latestTransactionId;
             int tid = new Integer(transactionId).intValue();
             
-            WebServiceSoap wsClient = service.getWebServiceSoap();
-            PResult answers = wsClient.getAnswers("HaibaImporter", "Test1234", caseDefinitionId, tid, 100);
+            WebServiceSoap wsClient = createWebserviceClient();
+            PResult answers = wsClient.getAnswers(username, password, caseDefinitionId, tid, batchSize);
             ArrayOfAnswer answers2 = answers.getAnswers();
             answerList = answers2.getAnswer();
     	} catch(Exception e)  {
@@ -81,6 +99,49 @@ public class EpimibaWebserviceClient {
     	
     	return answerList;
     }
+
+	private WebServiceSoap createWebserviceClient() throws Exception {
+		
+		URL wsdlLocation = new URL(wsdlURL);
+		QName serviceName = new QName("http://www.ssi.dk/", "WebService");
+		WebService ws = new WebService(wsdlLocation, serviceName);
+        WebServiceSoap wsClient = ws.getWebServiceSoap();
+        return wsClient;
+	}
+    
+    public List<Classification> getClassifications(String classificationType) {
+    	
+    	log.debug("Calling getClassifications with type "+classificationType);
+    	List<Classification> list = new ArrayList<Classification>();
+    	
+    	try {
+            List<GenericCoding> genericCoding = getCodings(classificationType);
+            
+            for (GenericCoding gc : genericCoding) {
+            	Classification c = new Classification();
+            	c.setId(gc.getId());
+				c.setCode(gc.getCode());
+				c.setText(gc.getText());
+				list.add(c);
+			}
+            
+    	} catch(Exception e)  {
+    		log.error("", e);
+    		throw new EpimibaWebserviceException(e.getMessage(), e);
+    	}
+    	log.debug("called getClassifications");
+    	
+    	return list;
+    }
+
+    List<GenericCoding> getCodings(String codingsType) throws Exception {
+		
+		WebServiceSoap wsClient = createWebserviceClient();
+		GenericCodingResult codings = wsClient.getCodings(username, password, codingsType);
+		ArrayOfGenericCoding codes = codings.getCodes();
+		List<GenericCoding> genericCoding = codes.getGenericCoding();
+		return genericCoding;
+	}
     
 
 

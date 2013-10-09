@@ -85,8 +85,9 @@ public class ImportExecutor {
 			
 			boolean hasAnswers = true;
 
+			// save bakteriaemi
 			while(hasAnswers) {
-	        	long latestTransactionId = haibaDao.getLatestTransactionId();
+	        	long latestTransactionId = haibaDao.getLatestTransactionId(HAIBADAO.BAKTERIAEMI_TRANSACTIONTYPE);
 	        	List<Answer> answers = epimibaWebserviceClient.getBakteriaemi(latestTransactionId);
 	        	if(answers == null || answers.size() == 0) {
 	        		log.debug("No more answers on Bakteriaemi");
@@ -99,6 +100,41 @@ public class ImportExecutor {
 					}
 	        	}
 			}
+			
+			// save clostridium difficile
+			hasAnswers = true;
+			while(hasAnswers) {
+	        	long latestTransactionId = haibaDao.getLatestTransactionId(HAIBADAO.CLOSTRIDIUM_TRANSACTIONTYPE);
+	        	List<Answer> answers = epimibaWebserviceClient.getClostridium(latestTransactionId);
+	        	if(answers == null || answers.size() == 0) {
+	        		log.debug("No more answers on Clostridium difficile");
+	        		hasAnswers = false;
+	        	} else {
+			        for (Answer answer : answers) {
+			        	log.debug(answer.getCprnr());
+			        	Header header = getHeader(answer);
+			        	haibaDao.saveClostridiumDifficile(header, answer.getTransactionID().longValue());
+					}
+	        	}
+			}
+
+			haibaDao.clearAnalysisTable();
+			haibaDao.saveAnalysis(epimibaWebserviceClient.getClassifications("Analysis"));
+
+			haibaDao.clearInvestigationTable();
+			haibaDao.saveInvestigation(epimibaWebserviceClient.getClassifications("Investigation"));
+			
+			haibaDao.clearLabSectionTable();
+			haibaDao.saveLabSection(epimibaWebserviceClient.getClassifications("LabSection"));
+			
+			haibaDao.clearLocationTable();
+			haibaDao.saveLocation(epimibaWebserviceClient.getClassifications("Locations"));
+			
+			haibaDao.clearOrganizationTable();
+			haibaDao.saveOrganization(epimibaWebserviceClient.getClassifications("Organization"));
+			
+			haibaDao.clearMicroorganismTable();
+			haibaDao.saveMicroorganism(epimibaWebserviceClient.getClassifications("Microorganism"));
 	        
 			statusRepo.importEndedWithSuccess(new DateTime());
 			

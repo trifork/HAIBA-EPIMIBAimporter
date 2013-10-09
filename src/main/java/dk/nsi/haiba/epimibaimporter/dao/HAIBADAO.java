@@ -26,16 +26,45 @@
  */
 package dk.nsi.haiba.epimibaimporter.dao;
 
+import java.util.List;
+
 import dk.nsi.haiba.epimibaimporter.exception.DAOException;
+import dk.nsi.haiba.epimibaimporter.model.Classification;
 import dk.nsi.haiba.epimibaimporter.model.Header;
 
 
 public interface HAIBADAO {
+	
+	public final static int BAKTERIAEMI_TRANSACTIONTYPE = 1;
+	public final static int CLOSTRIDIUM_TRANSACTIONTYPE = 2;
 
 	void saveBakteriaemi(Header header, long transactionId) throws DAOException;
 
-	void saveTransactionId(long transactionId) throws DAOException;
+	long getLatestTransactionId(int transactionType) throws DAOException;
 
-	long getLatestTransactionId() throws DAOException;
+	void saveClostridiumDifficile(Header header, long transactionId) throws DAOException;
 
+	void saveAnalysis(List<Classification> codeList) throws DAOException;
+
+	void saveInvestigation(List<Classification> codeList) throws DAOException;
+
+	void saveLabSection(List<Classification> codeList) throws DAOException;
+
+	void saveLocation(List<Classification> codeList) throws DAOException;
+
+	void saveOrganization(List<Classification> codeList) throws DAOException;
+
+	void saveMicroorganism(List<Classification> codeList) throws DAOException;
+
+	void clearAnalysisTable() throws DAOException;
+
+	void clearInvestigationTable() throws DAOException;
+
+	void clearLabSectionTable() throws DAOException;
+
+	void clearLocationTable() throws DAOException;
+
+	void clearOrganizationTable() throws DAOException;
+
+	void clearMicroorganismTable() throws DAOException;
 }

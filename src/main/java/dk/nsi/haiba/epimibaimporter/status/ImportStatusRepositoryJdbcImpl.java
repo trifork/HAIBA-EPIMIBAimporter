@@ -170,7 +170,7 @@ public class ImportStatusRepositoryJdbcImpl extends CommonDAO implements ImportS
 			sql = "SELECT headerid from Header LIMIT 1";
 		} else {
 			// MSSQL
-			sql = "SELECT Top 1 headerid from Header";
+			sql = "SELECT Top 1 headerid from BakHeader";
 		}
 
 		try {
