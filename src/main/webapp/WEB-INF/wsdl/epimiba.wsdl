@@ -254,6 +254,41 @@
         </s:complexContent>
       </s:complexType>
       <s:complexType name="MemberInfo" abstract="true" />
+      <s:element name="GetCodings">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="codingName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCodingsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCodingsResult" type="tns:GenericCodingResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GenericCodingResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Message" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Error" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Codes" type="tns:ArrayOfGenericCoding" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfGenericCoding">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="GenericCoding" nillable="true" type="tns:GenericCoding" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="GenericCoding">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Text" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Code" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+        </s:sequence>
+      </s:complexType>
       <s:element name="GetResults">
         <s:complexType>
           <s:sequence>
@@ -318,6 +353,7 @@
       <s:element name="PResult" nillable="true" type="tns:PResult" />
       <s:element name="ArrayOfString" nillable="true" type="tns:ArrayOfString" />
       <s:element name="PCodeResult" nillable="true" type="tns:PCodeResult" />
+      <s:element name="GenericCodingResult" nillable="true" type="tns:GenericCodingResult" />
       <s:element name="PCasedefinitionResult" nillable="true" type="tns:PCasedefinitionResult" />
     </s:schema>
   </wsdl:types>
@@ -350,6 +386,12 @@
   </wsdl:message>
   <wsdl:message name="GetTabLabSectionsSoapOut">
     <wsdl:part name="parameters" element="tns:GetTabLabSectionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCodingsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetCodings" />
+  </wsdl:message>
+  <wsdl:message name="GetCodingsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetCodingsResponse" />
   </wsdl:message>
   <wsdl:message name="GetResultsSoapIn">
     <wsdl:part name="parameters" element="tns:GetResults" />
@@ -398,6 +440,14 @@
   </wsdl:message>
   <wsdl:message name="GetTabLabSectionsHttpGetOut">
     <wsdl:part name="Body" element="tns:PCodeResult" />
+  </wsdl:message>
+  <wsdl:message name="GetCodingsHttpGetIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="codingName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetCodingsHttpGetOut">
+    <wsdl:part name="Body" element="tns:GenericCodingResult" />
   </wsdl:message>
   <wsdl:message name="GetResultsHttpGetIn">
     <wsdl:part name="Username" type="s:string" />
@@ -449,6 +499,14 @@
   <wsdl:message name="GetTabLabSectionsHttpPostOut">
     <wsdl:part name="Body" element="tns:PCodeResult" />
   </wsdl:message>
+  <wsdl:message name="GetCodingsHttpPostIn">
+    <wsdl:part name="username" type="s:string" />
+    <wsdl:part name="password" type="s:string" />
+    <wsdl:part name="codingName" type="s:string" />
+  </wsdl:message>
+  <wsdl:message name="GetCodingsHttpPostOut">
+    <wsdl:part name="Body" element="tns:GenericCodingResult" />
+  </wsdl:message>
   <wsdl:message name="GetResultsHttpPostIn">
     <wsdl:part name="Username" type="s:string" />
     <wsdl:part name="Password" type="s:string" />
@@ -489,6 +547,11 @@
       <wsdl:input message="tns:GetTabLabSectionsSoapIn" />
       <wsdl:output message="tns:GetTabLabSectionsSoapOut" />
     </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all codings for specific type</wsdl:documentation>
+      <wsdl:input message="tns:GetCodingsSoapIn" />
+      <wsdl:output message="tns:GetCodingsSoapOut" />
+    </wsdl:operation>
     <wsdl:operation name="GetResults">
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Result codes</wsdl:documentation>
       <wsdl:input message="tns:GetResultsSoapIn" />
@@ -526,6 +589,11 @@
       <wsdl:input message="tns:GetTabLabSectionsHttpGetIn" />
       <wsdl:output message="tns:GetTabLabSectionsHttpGetOut" />
     </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all codings for specific type</wsdl:documentation>
+      <wsdl:input message="tns:GetCodingsHttpGetIn" />
+      <wsdl:output message="tns:GetCodingsHttpGetOut" />
+    </wsdl:operation>
     <wsdl:operation name="GetResults">
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Result codes</wsdl:documentation>
       <wsdl:input message="tns:GetResultsHttpGetIn" />
@@ -562,6 +630,11 @@
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all TabLabSection codes</wsdl:documentation>
       <wsdl:input message="tns:GetTabLabSectionsHttpPostIn" />
       <wsdl:output message="tns:GetTabLabSectionsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all codings for specific type</wsdl:documentation>
+      <wsdl:input message="tns:GetCodingsHttpPostIn" />
+      <wsdl:output message="tns:GetCodingsHttpPostOut" />
     </wsdl:operation>
     <wsdl:operation name="GetResults">
       <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns all Result codes</wsdl:documentation>
@@ -614,6 +687,15 @@
     </wsdl:operation>
     <wsdl:operation name="GetTabLabSections">
       <soap:operation soapAction="http://www.ssi.dk/GetTabLabSections" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <soap:operation soapAction="http://www.ssi.dk/GetCodings" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -687,6 +769,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <soap12:operation soapAction="http://www.ssi.dk/GetCodings" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetResults">
       <soap12:operation soapAction="http://www.ssi.dk/GetResults" style="document" />
       <wsdl:input>
@@ -746,6 +837,15 @@
     </wsdl:operation>
     <wsdl:operation name="GetTabLabSections">
       <http:operation location="/GetTabLabSections" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <http:operation location="/GetCodings" />
       <wsdl:input>
         <http:urlEncoded />
       </wsdl:input>
@@ -819,6 +919,15 @@
         <mime:mimeXml part="Body" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="GetCodings">
+      <http:operation location="/GetCodings" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="GetResults">
       <http:operation location="/GetResults" />
       <wsdl:input>
@@ -840,16 +949,16 @@
   </wsdl:binding>
   <wsdl:service name="WebService">
     <wsdl:port name="WebServiceSoap" binding="tns:WebServiceSoap">
-      <soap:address location="http://epimibapsrv:8080/WebService.asmx" />
+      <soap:address location="http://epimibapsrv:8081/WebService.asmx" />
     </wsdl:port>
     <wsdl:port name="WebServiceSoap12" binding="tns:WebServiceSoap12">
-      <soap12:address location="http://epimibapsrv:8080/WebService.asmx" />
+      <soap12:address location="http://epimibapsrv:8081/WebService.asmx" />
     </wsdl:port>
     <wsdl:port name="WebServiceHttpGet" binding="tns:WebServiceHttpGet">
-      <http:address location="http://epimibapsrv:8080/WebService.asmx" />
+      <http:address location="http://epimibapsrv:8081/WebService.asmx" />
     </wsdl:port>
     <wsdl:port name="WebServiceHttpPost" binding="tns:WebServiceHttpPost">
-      <http:address location="http://epimibapsrv:8080/WebService.asmx" />
+      <http:address location="http://epimibapsrv:8081/WebService.asmx" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
