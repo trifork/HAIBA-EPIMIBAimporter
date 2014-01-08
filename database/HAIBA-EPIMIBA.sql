@@ -1,10 +1,10 @@
 CREATE DATABASE IF NOT EXISTS HAIBA;
 USE HAIBA;
 
-CREATE TABLE IF NOT EXISTS BakHeader (
-	   HeaderId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS Header (
+       HeaderId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
        Cprnr varchar(10),
-       Extid varchar(30),
+       Extid varchar(255),
        Refnr varchar(50),
        Labnr BIGINT(15),
        Lar BIGINT(15),
@@ -12,23 +12,24 @@ CREATE TABLE IF NOT EXISTS BakHeader (
        Indate datetime,
        Prdate datetime,
        Result varchar(50),
-       EvaluationText varchar(255),
+       Evaluation varchar(255),
        Usnr varchar(50),
-       Alnr varchar(50),
+       Alnr varchar(200),
        Stnr varchar(50),
        Avd varchar(50),
-       Mgkod varchar(50)
+       Mgkod varchar(300),
+       HAIBACaseDef char(4)
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS BakIsolate (
-	   IsolateId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS Isolate (
+       IsolateId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
+       Banr varchar(50),
        Quantity varchar(500),
        HeaderId BIGINT(15)
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-
-CREATE TABLE IF NOT EXISTS BakQuantitative (
-	   QuantitativeId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS Quantitative (
+       QuantitativeId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
        Analysis varchar(50),
        Comment varchar(1000),
        EvaluationText varchar(50),
@@ -37,40 +38,24 @@ CREATE TABLE IF NOT EXISTS BakQuantitative (
        HeaderId BIGINT(15)
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS CDHeader (
-	   HeaderId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
-       Cprnr varchar(10),
-       Extid varchar(30),
-       Refnr varchar(50),
-       Labnr BIGINT(15),
-       Lar BIGINT(15),
-       Pname varchar(150),
-       Indate datetime,
-       Prdate datetime,
-       Result varchar(50),
-       EvaluationText varchar(255),
-       Usnr varchar(50),
-       Alnr varchar(50),
-       Stnr varchar(50),
-       Avd varchar(50),
-       Mgkod varchar(50)
+-- must be populated manually, 119="Bakteriæmi" etc.
+CREATE TABLE IF NOT EXISTS CaseDef (
+       Id BIGINT(15) NOT NULL PRIMARY KEY,
+       Text varchar(1000)
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS CDIsolate (
-	   IsolateId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
-       Quantity varchar(500),
-       HeaderId BIGINT(15)
+CREATE TABLE IF NOT EXISTS KlassMicroorganism (
+	TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
+    Banr varchar(50) NOT NULL,
+    Text varchar(300) NULL,
+    H_BAKT_MICRO float NULL
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-
-CREATE TABLE IF NOT EXISTS CDQuantitative (
-	   QuantitativeId BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
-       Analysis varchar(50),
-       Comment varchar(1000),
-       EvaluationText varchar(50),
-       Qtnr varchar(50),
-       Quantity varchar(50),
-       HeaderId BIGINT(15)
+CREATE TABLE IF NOT EXISTS KlassLocation (
+    LocationId BIGINT(15) NOT NULL PRIMARY KEY,
+    Alnr varchar(50) NOT NULL,
+    Text varchar(300) NULL,
+    H_SAAR_LOC float NULL
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS Tabmicroorganism (

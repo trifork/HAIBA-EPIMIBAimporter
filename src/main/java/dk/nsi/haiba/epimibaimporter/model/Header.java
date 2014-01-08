@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.List;
 
 public class Header {
-
 	long headerId;
 	String cprnr;
 	String extid;
@@ -48,9 +47,16 @@ public class Header {
 	String stnr;
 	String avd;
 	String mgkod;
-	List<Isolate> isolates = new ArrayList<Isolate>();
+	String caseDef;
+    List<Isolate> isolates = new ArrayList<Isolate>();
 	List<Quantitative> quantitatives = new ArrayList<Quantitative>();
 	
+	public String getCaseDef() {
+	    return caseDef;
+	}
+	public void setCaseDef(String caseDef) {
+	    this.caseDef = caseDef;
+	}
        
 	public long getHeaderId() {
 		return headerId;

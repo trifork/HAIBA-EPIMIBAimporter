@@ -56,27 +56,13 @@ public class EpimibaWebserviceClient {
 
 	@Value("${epimiba.webservice.password}")
 	String password;
-	
-	@Value("${epimiba.casedefinitionid.bakteriaemi}")
-	int bakteriaemiId;
-	
-	@Value("${epimiba.casedefinitionid.clostridium}")
-	int clostridiumId;
 
 	@Value("${epimiba.casedefinition.batchsize}")
 	int batchSize;
 
 	private static Log log = new Log(Logger.getLogger(EpimibaWebserviceClient.class));
 
-	public List<Answer> getBakteriaemi(long latestTransactionId) {
-		return getAnswers(latestTransactionId + 1, bakteriaemiId);
-	}
-	
-	public List<Answer> getClostridium(long latestTransactionId) {
-		return getAnswers(latestTransactionId + 1, clostridiumId);
-	}
-	
-    List<Answer> getAnswers(long latestTransactionId, int caseDefinitionId) {
+    public List<Answer> getAnswers(long latestTransactionId, int caseDefinitionId) {
     	
     	log.debug("Calling getanswers");
     	List<Answer> answerList = new ArrayList<Answer>();

@@ -30,6 +30,7 @@ public class Isolate {
 
 	long isolateId;
 	String quantity;
+	String banr;
 	
 	public long getIsolateId() {
 		return isolateId;
@@ -43,4 +44,10 @@ public class Isolate {
 	public void setQuantity(String quantity) {
 		this.quantity = quantity;
 	}
+    public void setBanr(String isolateBanr) {
+        banr = isolateBanr;
+    }
+    public String getBanr() {
+        return banr;
+    }
 }

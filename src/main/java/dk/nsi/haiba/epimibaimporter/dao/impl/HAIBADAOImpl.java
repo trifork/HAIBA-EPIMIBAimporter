@@ -26,8 +26,12 @@
  */
 package dk.nsi.haiba.epimibaimporter.dao.impl;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +39,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.annotation.Transactional;
 
 import dk.nsi.haiba.epimibaimporter.dao.CommonDAO;
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
 import dk.nsi.haiba.epimibaimporter.exception.DAOException;
 import dk.nsi.haiba.epimibaimporter.log.Log;
+import dk.nsi.haiba.epimibaimporter.model.CaseDef;
 import dk.nsi.haiba.epimibaimporter.model.Classification;
 import dk.nsi.haiba.epimibaimporter.model.Header;
 import dk.nsi.haiba.epimibaimporter.model.Isolate;
@@ -48,437 +54,375 @@ import dk.nsi.haiba.epimibaimporter.model.Quantitative;
 
 @Transactional("haibaTransactionManager")
 public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
+    private static Log log = new Log(Logger.getLogger(HAIBADAOImpl.class));
 
-	private static Log log = new Log(Logger.getLogger(HAIBADAOImpl.class));
+    @Autowired
+    @Qualifier("haibaJdbcTemplate")
+    JdbcTemplate jdbc;
 
-	@Autowired
-	@Qualifier("haibaJdbcTemplate")
-	JdbcTemplate jdbc;
+    @Override
+    public void saveHeader(Header header, long transactionId, int caseDef) throws DAOException {
 
-	@Override
-	public void saveBakteriaemi(Header header, long transactionId) throws DAOException {
+        try {
 
-		try {
-			
-			String sql = null;
-			if(headerIdExists(header.getHeaderId(), "BakHeader")) {
-				log.debug("* Updating Bateriaemi Header");
-				sql = "UPDATE BakHeader set Cprnr=?, Extid=?, Refnr=?, Labnr=?, Lar=?, Pname=?, Indate=?, Prdate=?, Result=?, EvaluationText=?, Usnr=?, Alnr=?, Stnr=?, Avd=?, Mgkod=? where HeaderId=?";
-			} else {
-				log.debug("* Inserting Bateriaemi Header");
-				sql = "INSERT INTO BakHeader (Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, EvaluationText, Usnr, Alnr, Stnr, Avd, Mgkod, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			}
+            String sql = null;
+            if (headerIdExists(header.getHeaderId(), "Header")) {
+                log.debug("* Updating Header for caseDef " + caseDef);
+                sql = "UPDATE Header set Cprnr=?, Extid=?, Refnr=?, Labnr=?, Lar=?, Pname=?, Indate=?, Prdate=?, Result=?, Evaluation=?, Usnr=?, Alnr=?, Stnr=?, Avd=?, Mgkod=?, HAIBACaseDef=? where HeaderId=?";
+            } else {
+                log.debug("* Inserting Header");
+                sql = "INSERT INTO Header (Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, Evaluation, Usnr, Alnr, Stnr, Avd, Mgkod, HAIBACaseDef, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            }
 
-			Object[] args = new Object[] {
-				header.getCprnr(),
-				header.getExtid(),
-				header.getRefnr(),
-				header.getLabnr(),
-				header.getLar(),
-				header.getPname(),
-				header.getInDate(),
-				header.getPrDate(),
-				header.getResult(),
-				header.getEvaluationText(),
-				header.getUsnr(),
-				header.getAlnr(),
-				header.getStnr(),
-				header.getAvd(),
-				header.getMgkod(),
-				header.getHeaderId()	
-			};
+            Object[] args = new Object[] { header.getCprnr(), header.getExtid(),
+                    header.getRefnr(), header.getLabnr(), header.getLar(), header.getPname(), header.getInDate(),
+                    header.getPrDate(), header.getResult(), header.getEvaluationText(), header.getUsnr(),
+                    header.getAlnr(), header.getStnr(), header.getAvd(), header.getMgkod(), header.getCaseDef(), header.getHeaderId()};
 
-			jdbc.update(sql, args);
-			
-			saveBateriaemiIsolates(header.getIsolates(), header.getHeaderId());
-			saveBakteriaemiQuantitatives(header.getQuantitatives(), header.getHeaderId());
-			
-			saveTransactionId(transactionId, HAIBADAO.BAKTERIAEMI_TRANSACTIONTYPE);
-			log.debug("** Inserted Bateriaemi Header");
-		} catch (DataAccessException e) {
-			throw new DAOException(e.getMessage(), e);
-		}
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see dk.nsi.haiba.epimibaimporter.dao.HAIBADAO#saveClostridiumDifficile(dk.nsi.haiba.epimibaimporter.model.Header, long)
-	 * 
-	 * This is due to be refactored, when SSI comes up with a new specification for how they want data to be represented.
-	 */
-	@Override
-	public void saveClostridiumDifficile(Header header, long transactionId) throws DAOException {
+            jdbc.update(sql, args);
 
-		try {
+            saveIsolates(header.getIsolates(), header.getHeaderId());
+            saveQuantitatives(header.getQuantitatives(), header.getHeaderId());
 
-			String sql = null;
-			if(headerIdExists(header.getHeaderId(), "CDHeader")) {
-				log.debug("* Updating Clostridium Header");
-				sql = "UPDATE CDHeader set Cprnr=?, Extid=?, Refnr=?, Labnr=?, Lar=?, Pname=?, Indate=?, Prdate=?, Result=?, EvaluationText=?, Usnr=?, Alnr=?, Stnr=?, Avd=?, Mgkod=? where HeaderId=?";
-			} else {
-				log.debug("* Inserting Clostridium Header");
-				sql = "INSERT INTO CDHeader (Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, EvaluationText, Usnr, Alnr, Stnr, Avd, Mgkod, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-			}
+            saveTransactionId(transactionId, caseDef);
+            log.debug("** Inserted Header");
+        } catch (DataAccessException e) {
+            throw new DAOException(e.getMessage(), e);
+        }
+    }
 
-			Object[] args = new Object[] {
-				header.getCprnr(),
-				header.getExtid(),
-				header.getRefnr(),
-				header.getLabnr(),
-				header.getLar(),
-				header.getPname(),
-				header.getInDate(),
-				header.getPrDate(),
-				header.getResult(),
-				header.getEvaluationText(),
-				header.getUsnr(),
-				header.getAlnr(),
-				header.getStnr(),
-				header.getAvd(),
-				header.getMgkod(),
-				header.getHeaderId()	
-			};
+    private void saveQuantitatives(List<Quantitative> quantitatives, long headerId) {
 
-			jdbc.update(sql, args);
-			
-			saveCDIsolates(header.getIsolates(), header.getHeaderId());
-			saveCDQuantitatives(header.getQuantitatives(), header.getHeaderId());
-			
-			saveTransactionId(transactionId, HAIBADAO.CLOSTRIDIUM_TRANSACTIONTYPE);
-			log.debug("** Inserted Clostridium Header");
-		} catch (DataAccessException e) {
-			throw new DAOException(e.getMessage(), e);
-		}
-	}
+        log.debug("** Saving " + quantitatives.size() + " Quantitatives");
+        for (Quantitative q : quantitatives) {
 
-	private void saveBakteriaemiQuantitatives(List<Quantitative> quantitatives, long headerId) {
+            String sql = null;
+            if (quantitativeIdExists(q.getQuantitativeId(), headerId, "Quantitative")) {
+                sql = "UPDATE Quantitative set Analysis=?, Comment=?, EvaluationText=?, Qtnr=?, Quantity=?, HeaderId=? where QuantitativeId=?";
+            } else {
+                sql = "INSERT INTO Quantitative (Analysis, Comment, EvaluationText, Qtnr, Quantity, HeaderId, QuantitativeId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            }
 
-		log.debug("** Saving "+quantitatives.size()+" Bateriaemi Quantitatives");
-		for (Quantitative q : quantitatives) {
-			
-			String sql = null;
-			if(quantitativeIdExists(q.getQuantitativeId(), headerId, "BakQuantitative")) {
-				sql = "UPDATE BakQuantitative set Analysis=?, Comment=?, EvaluationText=?, Qtnr=?, Quantity=?, HeaderId=? where QuantitativeId=?";
-			} else {
-				sql = "INSERT INTO BakQuantitative (Analysis, Comment, EvaluationText, Qtnr, Quantity, HeaderId, QuantitativeId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-			}
+            Object[] args = new Object[] { q.getAnalysis(), q.getComment(), q.getEvaluationText(), q.getQtnr(),
+                    q.getQuantity(), headerId, q.getQuantitativeId() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Saved Quantitatives");
+    }
 
-			Object[] args = new Object[] {
-				q.getAnalysis(),
-				q.getComment(),
-				q.getEvaluationText(),
-				q.getQtnr(),
-				q.getQuantity(),
-				headerId,
-				q.getQuantitativeId()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Saved Bateriaemi Quantitatives");
-	}
+    private void saveIsolates(List<Isolate> isolates, long headerId) {
 
-	private void saveBateriaemiIsolates(List<Isolate> isolates, long headerId) {
+        log.debug("** Saving " + isolates.size() + " Isolates");
+        for (Isolate isolate : isolates) {
 
-		log.debug("** Saving "+isolates.size()+" Bakteriaemi Isolates");
-		for (Isolate isolate : isolates) {
+            String sql = null;
+            if (isolateIdExists(isolate.getIsolateId(), headerId, "Isolate")) {
+                sql = "UPDATE Isolate set Quantity=?, HeaderId=? where IsolateId=?";
+            } else {
+                sql = "INSERT INTO Isolate (Quantity, HeaderId, IsolateId) VALUES (?, ?, ?)";
+            }
 
-			String sql = null;
-			if(isolateIdExists(isolate.getIsolateId(), headerId, "BakIsolate")) {
-				sql = "UPDATE BakIsolate set Quantity=?, HeaderId=? where IsolateId=?";
-			} else {
-				sql = "INSERT INTO BakIsolate (Quantity, HeaderId, IsolateId) VALUES (?, ?, ?)";
-			}
+            Object[] args = new Object[] { isolate.getQuantity(), headerId, isolate.getIsolateId() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Saved Isolates");
 
-			Object[] args = new Object[] {
-				isolate.getQuantity(),
-				headerId,
-				isolate.getIsolateId()	
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Saved Bateriaemi Isolates");
-		
-	}
+    }
 
-	private void saveCDQuantitatives(List<Quantitative> quantitatives, long headerId) {
+    private void saveTransactionId(long transactionId, int transactionType) throws DAOException {
 
-		log.debug("** Saving "+quantitatives.size()+" Clostridium Quantitatives");
-		for (Quantitative q : quantitatives) {
-			
-			String sql = null;
-			if(quantitativeIdExists(q.getQuantitativeId(), headerId, "CDQuantitative")) {
-				sql = "UPDATE CDQuantitative set Analysis=?, Comment=?, EvaluationText=?, Qtnr=?, Quantity=?, HeaderId=? where QuantitativeId=?";
-			} else {
-				sql = "INSERT INTO CDQuantitative (Analysis, Comment, EvaluationText, Qtnr, Quantity, HeaderId, QuantitativeId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-			}
-			
-			Object[] args = new Object[] {
-				q.getAnalysis(),
-				q.getComment(),
-				q.getEvaluationText(),
-				q.getQtnr(),
-				q.getQuantity(),
-				headerId,
-				q.getQuantitativeId()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Saved Clostridium Quantitatives");
-	}
+        String sql = "INSERT INTO EpimibaTransaction (TransactionId, TransactionProcessed, TransactionType) VALUES (?, ?, ?)";
+        jdbc.update(sql, transactionId, new Date(), transactionType);
+    }
 
-	private void saveCDIsolates(List<Isolate> isolates, long headerId) {
+    @Override
+    public synchronized long getLatestTransactionId(int transactionType) throws DAOException {
+        long transactionId = -1;
 
-		log.debug("** Saving "+isolates.size()+" Clostridium Isolates");
-		for (Isolate isolate : isolates) {
+        transactionId = jdbc
+                .queryForLong("SELECT MAX(TransactionId) AS maxId FROM EpimibaTransaction where transactionType = ?",
+                        transactionType);
 
-			String sql = null;
-			if(isolateIdExists(isolate.getIsolateId(), headerId, "CDIsolate")) {
-				sql = "UPDATE CDIsolate set Quantity=?, HeaderId=? where IsolateId=?";
-			} else {
-				sql = "INSERT INTO CDIsolate (Quantity, HeaderId, IsolateId) VALUES (?, ?, ?)";
-			}
+        return transactionId;
+    }
 
-			Object[] args = new Object[] {
-				isolate.getQuantity(),
-				headerId,
-				isolate.getIsolateId()	
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Saved Clostridium Isolates");
-		
-	}
-
-	private void saveTransactionId(long transactionId, int transactionType) throws DAOException {
-
-		String sql = "INSERT INTO EpimibaTransaction (TransactionId, TransactionProcessed, TransactionType) VALUES (?, ?, ?)";
-		jdbc.update(sql, transactionId, new Date(), transactionType);
-	}
-	
-	@Override
-	public synchronized long getLatestTransactionId(int transactionType) throws DAOException {
-		long transactionId = -1;
-		
-		transactionId = jdbc.queryForLong("SELECT MAX(TransactionId) AS maxId FROM EpimibaTransaction where transactionType = ?", transactionType);
-		
-		return transactionId;
-	}
-
-	@Override
-	public void clearAnalysisTable() throws DAOException {
-	    try {
-			jdbc.update("DELETE FROM TabAnalysis");
+    @Override
+    public void clearAnalysisTable() throws DAOException {
+        try {
+            jdbc.update("DELETE FROM TabAnalysis");
         } catch (Exception e) {
             throw new DAOException("", e);
         }
-	}
-	@Override
-	public void clearInvestigationTable() throws DAOException {
-	    try {
-			jdbc.update("DELETE FROM TabInvestigation");
+    }
+
+    @Override
+    public void clearInvestigationTable() throws DAOException {
+        try {
+            jdbc.update("DELETE FROM TabInvestigation");
         } catch (Exception e) {
             throw new DAOException("", e);
         }
-	}
-	@Override
-	public void clearLabSectionTable() throws DAOException {
-	    try {
-			jdbc.update("DELETE FROM TabLabSection");
+    }
+
+    @Override
+    public void clearLabSectionTable() throws DAOException {
+        try {
+            jdbc.update("DELETE FROM TabLabSection");
         } catch (Exception e) {
             throw new DAOException("", e);
         }
-	}
-	@Override
-	public void clearLocationTable() throws DAOException {
-	    try {
-			jdbc.update("DELETE FROM TabLocation");
+    }
+
+    @Override
+    public void clearLocationTable() throws DAOException {
+        try {
+            jdbc.update("DELETE FROM TabLocation");
         } catch (Exception e) {
             throw new DAOException("", e);
         }
-	}
-	@Override
-	public void clearOrganizationTable() throws DAOException {
-	    try {
-			jdbc.update("DELETE FROM TabOrganization");
+    }
+
+    @Override
+    public void clearOrganizationTable() throws DAOException {
+        try {
+            jdbc.update("DELETE FROM TabOrganization");
         } catch (Exception e) {
             throw new DAOException("", e);
         }
-	}
-	@Override
-	public void clearMicroorganismTable() throws DAOException {
-	    try {
-			jdbc.update("DELETE FROM Tabmicroorganism");
+    }
+
+    @Override
+    public void clearMicroorganismTable() throws DAOException {
+        try {
+            jdbc.update("DELETE FROM Tabmicroorganism");
         } catch (Exception e) {
             throw new DAOException("", e);
         }
-	}
-	
-	@Override
-	public void saveAnalysis(List<Classification> codeList) throws DAOException {
-		
-		log.debug("** Inserting "+codeList.size()+" Analysis classifications");
-		for (Classification c : codeList) {
+    }
 
-			String sql = "INSERT INTO TabAnalysis (TabAnalysisId, Qtnr, Text) VALUES(?,?,?)";
+    @Override
+    public void saveAnalysis(List<Classification> codeList) throws DAOException {
 
-			Object[] args = new Object[] {
-				c.getId(),	
-				c.getCode(),
-				c.getText()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Inserted Analysis classifications");
-	}
+        log.debug("** Inserting " + codeList.size() + " Analysis classifications");
+        for (Classification c : codeList) {
 
-	@Override
-	public void saveInvestigation(List<Classification> codeList) throws DAOException {
+            String sql = "INSERT INTO TabAnalysis (TabAnalysisId, Qtnr, Text) VALUES(?,?,?)";
 
-		log.debug("** Inserting "+codeList.size()+" Investigation classifications");
-		for (Classification c : codeList) {
+            Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Inserted Analysis classifications");
+    }
 
-			String sql = "INSERT INTO TabInvestigation (TabInvestigationId, Usnr, Text) VALUES(?,?,?)";
+    @Override
+    public void saveInvestigation(List<Classification> codeList) throws DAOException {
 
-			Object[] args = new Object[] {
-				c.getId(),	
-				c.getCode(),
-				c.getText()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Inserted Investigation classifications");
-	}
+        log.debug("** Inserting " + codeList.size() + " Investigation classifications");
+        for (Classification c : codeList) {
 
-	@Override
-	public void saveLabSection(List<Classification> codeList) throws DAOException {
+            String sql = "INSERT INTO TabInvestigation (TabInvestigationId, Usnr, Text) VALUES(?,?,?)";
 
-		log.debug("** Inserting "+codeList.size()+" LabSection classifications");
-		for (Classification c : codeList) {
+            Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Inserted Investigation classifications");
+    }
 
-			String sql = "INSERT INTO TabLabSection (TabLabSectionId, Avd, Text) VALUES(?,?,?)";
+    @Override
+    public void saveLabSection(List<Classification> codeList) throws DAOException {
 
-			Object[] args = new Object[] {
-				c.getId(),	
-				c.getCode(),
-				c.getText()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Inserted LabSection classifications");
-		
-	}
+        log.debug("** Inserting " + codeList.size() + " LabSection classifications");
+        for (Classification c : codeList) {
 
-	@Override
-	public void saveLocation(List<Classification> codeList) throws DAOException {
+            String sql = "INSERT INTO TabLabSection (TabLabSectionId, Avd, Text) VALUES(?,?,?)";
 
-		log.debug("** Inserting "+codeList.size()+" Location classifications");
-		for (Classification c : codeList) {
+            Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Inserted LabSection classifications");
 
-			String sql = "INSERT INTO TabLocation (TabLocationId, Alnr, Text) VALUES(?,?,?)";
+    }
 
-			Object[] args = new Object[] {
-				c.getId(),	
-				c.getCode(),
-				c.getText()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Inserted Location classifications");
-		
-	}
+    @Override
+    public void saveLocation(List<Classification> codeList) throws DAOException {
 
-	@Override
-	public void saveOrganization(List<Classification> codeList)	throws DAOException {
+        log.debug("** Inserting " + codeList.size() + " Location classifications");
+        for (Classification c : codeList) {
 
-		log.debug("** Inserting "+codeList.size()+" Organization classifications");
-		for (Classification c : codeList) {
+            String sql = "INSERT INTO TabLocation (TabLocationId, Alnr, Text) VALUES(?,?,?)";
 
-			String sql = "INSERT INTO TabOrganization (TabOrganizationId, Mgkod, Text) VALUES(?,?,?)";
+            Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Inserted Location classifications");
 
-			Object[] args = new Object[] {
-				c.getId(),	
-				c.getCode(),
-				c.getText()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Inserted Organization classifications");
-	}
+    }
 
-	@Override
-	public void saveMicroorganism(List<Classification> codeList) throws DAOException {
-		log.debug("** Inserting "+codeList.size()+" Microorganism classifications");
-		for (Classification c : codeList) {
+    @Override
+    public void saveOrganization(List<Classification> codeList) throws DAOException {
 
-			String sql = "INSERT INTO TabMicroorganism (TabMicroorganismId, Banr, Text) VALUES(?,?,?)";
+        log.debug("** Inserting " + codeList.size() + " Organization classifications");
+        for (Classification c : codeList) {
 
-			Object[] args = new Object[] {
-				c.getId(),	
-				c.getCode(),
-				c.getText()
-			};
-			jdbc.update(sql, args);
-		}
-		log.debug("** Inserted Microorganism classifications");
-	}
+            String sql = "INSERT INTO TabOrganization (TabOrganizationId, Mgkod, Text) VALUES(?,?,?)";
 
-	private boolean headerIdExists(long headerId, String tableName) {
-		String sql = null;
-		if(MYSQL.equals(getDialect())) {
-			sql = "SELECT HeaderId FROM "+tableName+" where HeaderID=? LIMIT 1";
-		} else {
-			// MSSQL
-			sql = "SELECT TOP 1 HeaderId FROM "+tableName+" where HeaderID=?";
-		}
-		
-	    try {
-	    	jdbc.queryForLong(sql,new Object[]{headerId});
-	    	return true;
-        } catch(EmptyResultDataAccessException e) {
-        	// ignore - no headerID exists
+            Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Inserted Organization classifications");
+    }
+
+    @Override
+    public void saveMicroorganism(List<Classification> codeList) throws DAOException {
+        log.debug("** Inserting " + codeList.size() + " Microorganism classifications");
+        for (Classification c : codeList) {
+
+            String sql = "INSERT INTO TabMicroorganism (TabMicroorganismId, Banr, Text) VALUES(?,?,?)";
+
+            Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
+            jdbc.update(sql, args);
+        }
+        log.debug("** Inserted Microorganism classifications");
+    }
+
+    private boolean headerIdExists(long headerId, String tableName) {
+        String sql = null;
+        if (MYSQL.equals(getDialect())) {
+            sql = "SELECT HeaderId FROM " + tableName + " where HeaderID=? LIMIT 1";
+        } else {
+            // MSSQL
+            sql = "SELECT TOP 1 HeaderId FROM " + tableName + " where HeaderID=?";
+        }
+
+        try {
+            jdbc.queryForLong(sql, new Object[] { headerId });
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            // ignore - no headerID exists
         } catch (RuntimeException e) {
-            throw new DAOException("Error Fetching HeaderID from "+tableName, e);
+            throw new DAOException("Error Fetching HeaderID from " + tableName, e);
         }
-    	return false;
-	}
+        return false;
+    }
 
-	private boolean isolateIdExists(long isolateId, long headerId, String tableName) {
-		String sql = null;
-		if(MYSQL.equals(getDialect())) {
-			sql = "SELECT isolateId FROM "+tableName+" where isolateID=? and headerId=? LIMIT 1";
-		} else {
-			// MSSQL
-			sql = "SELECT TOP 1 isolateId FROM "+tableName+" where isolateID=? and headerId=?";
-		}
-		
-	    try {
-	    	jdbc.queryForLong(sql,new Object[]{isolateId, headerId});
-	    	return true;
-        } catch(EmptyResultDataAccessException e) {
-        	// ignore - no isolateID exists
-        } catch (RuntimeException e) {
-            throw new DAOException("Error Fetching isolateID from "+tableName, e);
+    private boolean isolateIdExists(long isolateId, long headerId, String tableName) {
+        String sql = null;
+        if (MYSQL.equals(getDialect())) {
+            sql = "SELECT isolateId FROM " + tableName + " where isolateID=? and headerId=? LIMIT 1";
+        } else {
+            // MSSQL
+            sql = "SELECT TOP 1 isolateId FROM " + tableName + " where isolateID=? and headerId=?";
         }
-    	return false;
-	}
 
-	private boolean quantitativeIdExists(long quantitativeId, long headerId, String tableName) {
-		String sql = null;
-		if(MYSQL.equals(getDialect())) {
-			sql = "SELECT QuantitativeId FROM "+tableName+" where QuantitativeId=? and headerId=? LIMIT 1";
-		} else {
-			// MSSQL
-			sql = "SELECT TOP 1 QuantitativeId FROM "+tableName+" where QuantitativeId=? and headerId=?";
-		}
-		
-	    try {
-	    	jdbc.queryForLong(sql,new Object[]{quantitativeId, headerId});
-	    	return true;
-        } catch(EmptyResultDataAccessException e) {
-        	// ignore - no QuantitativeId exists
+        try {
+            jdbc.queryForLong(sql, new Object[] { isolateId, headerId });
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            // ignore - no isolateID exists
         } catch (RuntimeException e) {
-            throw new DAOException("Error Fetching QuantitativeId from "+tableName, e);
+            throw new DAOException("Error Fetching isolateID from " + tableName, e);
         }
-    	return false;
-	}
+        return false;
+    }
+
+    private boolean rowExists(String columnName, String value, String tableName) {
+        String sql = null;
+        if (MYSQL.equals(getDialect())) {
+            sql = "SELECT " + columnName + " FROM " + tableName + " where " + columnName + "=? LIMIT 1";
+        } else {
+            // MSSQL
+            sql = "SELECT TOP 1 " + columnName + " FROM " + tableName + " where " + columnName + "=?";
+        }
+
+        try {
+            jdbc.queryForObject(sql, String.class, new Object[] { value });
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            // ignore - does not exist
+        } catch (RuntimeException e) {
+            throw new DAOException("Error testing existence of " + value + "@" + columnName + " in " + tableName, e);
+        }
+        return false;
+    }
+
+    private boolean quantitativeIdExists(long quantitativeId, long headerId, String tableName) {
+        String sql = null;
+        if (MYSQL.equals(getDialect())) {
+            sql = "SELECT QuantitativeId FROM " + tableName + " where QuantitativeId=? and headerId=? LIMIT 1";
+        } else {
+            // MSSQL
+            sql = "SELECT TOP 1 QuantitativeId FROM " + tableName + " where QuantitativeId=? and headerId=?";
+        }
+
+        try {
+            jdbc.queryForLong(sql, new Object[] { quantitativeId, headerId });
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            // ignore - no QuantitativeId exists
+        } catch (RuntimeException e) {
+            throw new DAOException("Error Fetching QuantitativeId from " + tableName, e);
+        }
+        return false;
+    }
+
+    @Override
+    public CaseDef[] getCaseDefs() {
+        log.debug("** querying for CaseDef's");
+        String sql = "SELECT * FROM CaseDef";
+        List<CaseDef> returnValue = jdbc.query(sql, new RowMapper<CaseDef>() {
+            @Override
+            public CaseDef mapRow(ResultSet rs, int rowNum) throws SQLException {
+                CaseDef returnValue = new CaseDef();
+                returnValue.setId(rs.getInt("id"));
+                returnValue.setText(rs.getString("text"));
+                return returnValue;
+            }
+        });
+        return returnValue.toArray(new CaseDef[0]);
+    }
+
+    @Override
+    public Set<String> getAndCopyUnknownBanrSet(Set<String> banrInNewAnswers) {
+        Set<String> returnValue = new HashSet<String>();
+        for (String banr : banrInNewAnswers) {
+            if (!rowExists("Banr", banr, "KlassMicroorganism")) {
+                returnValue.add(banr);
+            }
+        }
+        if (!returnValue.isEmpty()) {
+            for (String banr : returnValue) {
+                String sql = "INSERT INTO KlassMicroorganism (TabmicroorganismId, Banr, Text) "
+                        + "SELECT TabmicroorganismId, Banr, Text FROM Tabmicroorganism "
+                        + "WHERE Banr=?";
+                try {
+                    jdbc.update(sql, banr);
+                } catch (Exception e) {
+                    log.error("not able to execute " + sql, e);
+                }
+            }
+        }
+        return returnValue;
+    }
+
+    @Override
+    public Set<String> getAndCopyUnknownAlnrSet(Set<String> alnrInNewAnswers) {
+        Set<String> returnValue = new HashSet<String>();
+        for (String alnr : alnrInNewAnswers) {
+            if (!rowExists("Alnr", alnr, "KlassLocation")) {
+                returnValue.add(alnr);
+            }
+        }
+        if (!returnValue.isEmpty()) {
+            for (String banr : returnValue) {
+                String sql = "INSERT INTO KlassLocation (LocationId, Alnr, Text) "
+                        + "SELECT TabLocationId, Alnr, Text FROM TabLocation " + "WHERE Alnr=?";
+                try {
+                    jdbc.update(sql, banr);
+                } catch (Exception e) {
+                    log.error("not able to execute " + sql, e);
+                }
+            }
+        }
+        return returnValue;
+    }
 }

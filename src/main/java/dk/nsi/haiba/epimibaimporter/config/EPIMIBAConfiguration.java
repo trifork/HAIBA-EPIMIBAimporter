@@ -26,6 +26,8 @@
  */
 package dk.nsi.haiba.epimibaimporter.config;
 
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,12 +42,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jndi.JndiObjectFactoryBean;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
 import dk.nsi.haiba.epimibaimporter.dao.impl.HAIBADAOImpl;
+import dk.nsi.haiba.epimibaimporter.email.EmailSender;
 import dk.nsi.haiba.epimibaimporter.importer.ImportExecutor;
 import dk.nsi.haiba.epimibaimporter.message.MessageResolver;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepository;
@@ -55,92 +60,120 @@ import dk.nsi.haiba.epimibaimporter.status.TimeSourceRealTimeImpl;
 import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
 
 /**
- * Configuration class 
- * providing the common infrastructure.
+ * Configuration class providing the common infrastructure.
  */
 @Configuration
 @EnableScheduling
 @EnableTransactionManagement
 public class EPIMIBAConfiguration {
 
-	@Value("${jdbc.haibaJNDIName}")
-	private String haibaJdbcJNDIName;
+    @Value("${jdbc.haibaJNDIName}")
+    private String haibaJdbcJNDIName;
+    
+    @Value("${smtp.host}")
+    private String smtpHost;
+    @Value("${smtp.port}")
+    private int smtpPort;
 
-	// this is not automatically registered, see https://jira.springsource.org/browse/SPR-8539
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
-		propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(true);
-		propertySourcesPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(false);
+    // this is not automatically registered, see https://jira.springsource.org/browse/SPR-8539
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+        propertySourcesPlaceholderConfigurer.setIgnoreResourceNotFound(true);
+        propertySourcesPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(false);
 
-		propertySourcesPlaceholderConfigurer.setLocations(new Resource[]{new ClassPathResource("default-config.properties"), new ClassPathResource("epimibaconfig.properties")});
+        propertySourcesPlaceholderConfigurer
+                .setLocations(new Resource[] { new ClassPathResource("default-config.properties"),
+                        new ClassPathResource("epimibaconfig.properties") });
 
-		return propertySourcesPlaceholderConfigurer;
-	}
+        return propertySourcesPlaceholderConfigurer;
+    }
 
-	@Bean
-	@Qualifier("haibaDataSource")
-	public DataSource haibaDataSource() throws Exception {
-		JndiObjectFactoryBean factory = new JndiObjectFactoryBean();
-		factory.setJndiName(haibaJdbcJNDIName);
-		factory.setExpectedType(DataSource.class);
-		factory.afterPropertiesSet();
-		return (DataSource) factory.getObject();
-	}
+    @Bean
+    @Qualifier("haibaDataSource")
+    public DataSource haibaDataSource() throws Exception {
+        JndiObjectFactoryBean factory = new JndiObjectFactoryBean();
+        factory.setJndiName(haibaJdbcJNDIName);
+        factory.setExpectedType(DataSource.class);
+        factory.afterPropertiesSet();
+        return (DataSource) factory.getObject();
+    }
 
-	@Bean
-	public JdbcTemplate haibaJdbcTemplate(@Qualifier("haibaDataSource") DataSource ds) {
-		return new JdbcTemplate(ds);
-	}
+    @Bean
+    public JdbcTemplate haibaJdbcTemplate(@Qualifier("haibaDataSource") DataSource ds) {
+        return new JdbcTemplate(ds);
+    }
 
-	@Bean
-	@Qualifier("haibaTransactionManager")
-	public PlatformTransactionManager haibaTransactionManager(@Qualifier("haibaDataSource") DataSource ds) {
-		return new DataSourceTransactionManager(ds);
-	}
+    @Bean
+    @Qualifier("haibaTransactionManager")
+    public PlatformTransactionManager haibaTransactionManager(@Qualifier("haibaDataSource") DataSource ds) {
+        return new DataSourceTransactionManager(ds);
+    }
 
-	// This needs the static modifier due to https://jira.springsource.org/browse/SPR-8269. If not static, field jdbcJndiName
-	// will not be set when trying to instantiate the DataSource
-	@Bean
-	public static CustomScopeConfigurer scopeConfigurer() {
-		return new SimpleThreadScopeConfigurer();
-	}
-	
-	@Bean
-	public ImportStatusRepository statusRepo() {
-		return new ImportStatusRepositoryJdbcImpl(); 
-	}
+    // This needs the static modifier due to https://jira.springsource.org/browse/SPR-8269. If not static, field
+    // jdbcJndiName
+    // will not be set when trying to instantiate the DataSource
+    @Bean
+    public static CustomScopeConfigurer scopeConfigurer() {
+        return new SimpleThreadScopeConfigurer();
+    }
 
-	@Bean
-	public ImportExecutor importExecutor() {
-		return new ImportExecutor();
-	}
+    @Bean
+    public ImportStatusRepository statusRepo() {
+        return new ImportStatusRepositoryJdbcImpl();
+    }
 
-	@Bean
-	public TimeSource timeSource() {
-		return new TimeSourceRealTimeImpl();
-	}
+    @Bean
+    public ImportExecutor importExecutor() {
+        return new ImportExecutor();
+    }
 
-	@Bean
-    public ReloadableResourceBundleMessageSource messageSource(){
-        ReloadableResourceBundleMessageSource messageSource=new ReloadableResourceBundleMessageSource();
-        String[] resources= {"classpath:messages"};
+    @Bean
+    public TimeSource timeSource() {
+        return new TimeSourceRealTimeImpl();
+    }
+
+    @Bean
+    public ReloadableResourceBundleMessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        String[] resources = { "classpath:messages" };
         messageSource.setBasenames(resources);
         return messageSource;
     }
-	
-	@Bean
-	public MessageResolver resolver() {
-		return new MessageResolver();
-	}
-	
-	@Bean
+
+    @Bean
+    public MessageResolver resolver() {
+        return new MessageResolver();
+    }
+
+    @Bean
     public HAIBADAO haibaDao() {
         return new HAIBADAOImpl();
     }
-	
-	@Bean
-	public EpimibaWebserviceClient epimibaWebserviceClient() {
-		return new EpimibaWebserviceClient();
-	}
+
+    @Bean
+    public EpimibaWebserviceClient epimibaWebserviceClient() {
+        return new EpimibaWebserviceClient();
+    }
+
+    @Bean
+    public EmailSender mailSender() {
+        return new EmailSender();
+    }
+
+    @Bean
+    public JavaMailSender javaMailSender() {
+        Properties javaMailProperties = new Properties();
+        javaMailProperties.put("mail.smtp.auth", true);
+        javaMailProperties.put("mail.smtp.starttls.enable", true);
+        javaMailProperties.put("mail.smtp.host", smtpHost);
+        javaMailProperties.put("mail.smtp.port", smtpPort);
+
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setJavaMailProperties(javaMailProperties);
+        sender.setUsername("haibatest@gmail.com");
+        sender.setPassword("Papkasse1");
+
+        return sender;
+    }
 }

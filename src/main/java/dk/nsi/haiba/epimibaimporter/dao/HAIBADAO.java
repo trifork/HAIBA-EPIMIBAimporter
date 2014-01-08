@@ -27,22 +27,18 @@
 package dk.nsi.haiba.epimibaimporter.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import dk.nsi.haiba.epimibaimporter.exception.DAOException;
+import dk.nsi.haiba.epimibaimporter.model.CaseDef;
 import dk.nsi.haiba.epimibaimporter.model.Classification;
 import dk.nsi.haiba.epimibaimporter.model.Header;
 
 
 public interface HAIBADAO {
-	
-	public final static int BAKTERIAEMI_TRANSACTIONTYPE = 1;
-	public final static int CLOSTRIDIUM_TRANSACTIONTYPE = 2;
+	long getLatestTransactionId(int caseDef) throws DAOException;
 
-	void saveBakteriaemi(Header header, long transactionId) throws DAOException;
-
-	long getLatestTransactionId(int transactionType) throws DAOException;
-
-	void saveClostridiumDifficile(Header header, long transactionId) throws DAOException;
+	void saveHeader(Header header, long transactionId, int caseDef) throws DAOException;
 
 	void saveAnalysis(List<Classification> codeList) throws DAOException;
 
@@ -67,4 +63,10 @@ public interface HAIBADAO {
 	void clearOrganizationTable() throws DAOException;
 
 	void clearMicroorganismTable() throws DAOException;
+
+    CaseDef[] getCaseDefs();
+
+    Set<String> getAndCopyUnknownBanrSet(Set<String> banrInNewAnswers);
+
+    Set<String> getAndCopyUnknownAlnrSet(Set<String> banrInNewAnswers);
 }
