@@ -65,8 +65,4 @@ public interface HAIBADAO {
 	void clearMicroorganismTable() throws DAOException;
 
     CaseDef[] getCaseDefs();
-
-    Set<String> getAndCopyUnknownBanrSet(Set<String> banrInNewAnswers);
-
-    Set<String> getAndCopyUnknownAlnrSet(Set<String> banrInNewAnswers);
 }

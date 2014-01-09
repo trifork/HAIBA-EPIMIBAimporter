@@ -325,26 +325,6 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
         return false;
     }
 
-    private boolean rowExists(String columnName, String value, String tableName) {
-        String sql = null;
-        if (MYSQL.equals(getDialect())) {
-            sql = "SELECT " + columnName + " FROM " + tableName + " where " + columnName + "=? LIMIT 1";
-        } else {
-            // MSSQL
-            sql = "SELECT TOP 1 " + columnName + " FROM " + tableName + " where " + columnName + "=?";
-        }
-
-        try {
-            jdbc.queryForObject(sql, String.class, new Object[] { value });
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            // ignore - does not exist
-        } catch (RuntimeException e) {
-            throw new DAOException("Error testing existence of " + value + "@" + columnName + " in " + tableName, e);
-        }
-        return false;
-    }
-
     private boolean quantitativeIdExists(long quantitativeId, long headerId, String tableName) {
         String sql = null;
         if (MYSQL.equals(getDialect())) {
@@ -379,50 +359,5 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
             }
         });
         return returnValue.toArray(new CaseDef[0]);
-    }
-
-    @Override
-    public Set<String> getAndCopyUnknownBanrSet(Set<String> banrInNewAnswers) {
-        Set<String> returnValue = new HashSet<String>();
-        for (String banr : banrInNewAnswers) {
-            if (!rowExists("Banr", banr, "Klass_microorganism")) {
-                returnValue.add(banr);
-            }
-        }
-        if (!returnValue.isEmpty()) {
-            for (String banr : returnValue) {
-                String sql = "INSERT INTO Klass_microorganism (TabmicroorganismId, Banr, Text) "
-                        + "SELECT TabmicroorganismId, Banr, Text FROM Tabmicroorganism "
-                        + "WHERE Banr=?";
-                try {
-                    jdbc.update(sql, banr);
-                } catch (Exception e) {
-                    log.error("not able to execute " + sql, e);
-                }
-            }
-        }
-        return returnValue;
-    }
-
-    @Override
-    public Set<String> getAndCopyUnknownAlnrSet(Set<String> alnrInNewAnswers) {
-        Set<String> returnValue = new HashSet<String>();
-        for (String alnr : alnrInNewAnswers) {
-            if (!rowExists("Alnr", alnr, "Klass_Location")) {
-                returnValue.add(alnr);
-            }
-        }
-        if (!returnValue.isEmpty()) {
-            for (String banr : returnValue) {
-                String sql = "INSERT INTO Klass_Location (TabLocationId, Alnr, Text) "
-                        + "SELECT TabLocationId, Alnr, Text FROM TabLocation " + "WHERE Alnr=?";
-                try {
-                    jdbc.update(sql, banr);
-                } catch (Exception e) {
-                    log.error("not able to execute " + sql, e);
-                }
-            }
-        }
-        return returnValue;
     }
 }
