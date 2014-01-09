@@ -103,9 +103,9 @@ public class EmailSenderTest {
 
     @Test
     public void testEmailSendOnNewEntries() {
-        int count = jdbc.queryForInt("SELECT COUNT(*) FROM KlassMicroorganism");
+        int count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Microorganism");
         assertEquals("Empty KlassMicroorganism", 0, count);
-        count = jdbc.queryForInt("SELECT COUNT(*) FROM KlassLocation");
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Location");
         assertEquals("Empty KlassLocation", 0, count);
 
         List<Answer> answers = new ArrayList<Answer>();
@@ -144,9 +144,9 @@ public class EmailSenderTest {
         Set<String> unknownAlnrSet = new HashSet<String>(Arrays.asList(new String[]{"1"}));
         Mockito.verify(emailSender, Mockito.times(1)).send(unknownBanrSet, unknownAlnrSet);
 
-        count = jdbc.queryForInt("SELECT COUNT(*) FROM KlassMicroorganism");
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Microorganism");
         assertEquals("Not Empty KlassMicroorganism", 1, count);
-        count = jdbc.queryForInt("SELECT COUNT(*) FROM KlassLocation");
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Location");
         assertEquals("Not Empty KlassLocation", 1, count);
         
         importExecutor.doProcess();

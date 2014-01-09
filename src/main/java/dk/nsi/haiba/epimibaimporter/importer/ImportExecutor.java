@@ -26,6 +26,7 @@
  */
 package dk.nsi.haiba.epimibaimporter.importer;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,8 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import dk.nsi.haiba.epimibaimporter.dao.ClassificationCheckDAO;
+import dk.nsi.haiba.epimibaimporter.dao.DefaultClassificationCheckDAOColumnMapper;
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
 import dk.nsi.haiba.epimibaimporter.email.EmailSender;
 import dk.nsi.haiba.epimibaimporter.log.Log;
@@ -55,7 +58,6 @@ import dk.nsi.stamdata.jaxws.generated.PQuantitative;
  * Scheduled job, responsible for fetching new data from LPR, then send it to the RulesEngine for further processing
  */
 public class ImportExecutor {
-
     private static Log log = new Log(Logger.getLogger(ImportExecutor.class));
 
     private boolean manualOverride;
@@ -71,6 +73,9 @@ public class ImportExecutor {
 
     @Autowired
     EmailSender emailSender;
+
+    @Autowired
+    ClassificationCheckDAO classificationCheckDAO;
 
     @Scheduled(cron = "${cron.import.job}")
     public void run() {
@@ -145,8 +150,13 @@ public class ImportExecutor {
     }
 
     private void checkAndSendEmailOnNewImports(Set<String> alnrInNewAnswers, Set<String> banrInNewAnswers) {
-        Set<String> unknownBanrSet = haibaDao.getAndCopyUnknownBanrSet(banrInNewAnswers);
-        Set<String> unknownAlnrSet = haibaDao.getAndCopyUnknownAlnrSet(alnrInNewAnswers);
+        Collection<String> unknownBanrSet = classificationCheckDAO.checkClassifications(banrInNewAnswers, "Banr",
+                new MyBanrClassificationCheckMapper());
+        Collection<String> unknownAlnrSet = classificationCheckDAO.checkClassifications(alnrInNewAnswers, "Alnr",
+                new MyAlnrClassificationCheckMapper());
+
+        // Set<String> unknownBanrSet = haibaDao.getAndCopyUnknownBanrSet(banrInNewAnswers);
+        // Set<String> unknownAlnrSet = haibaDao.getAndCopyUnknownAlnrSet(alnrInNewAnswers);
         if (!unknownBanrSet.isEmpty() || !unknownAlnrSet.isEmpty()) {
             log.debug("send email about new banr=" + unknownBanrSet + " or new alnr=" + unknownAlnrSet);
             emailSender.send(unknownBanrSet, unknownAlnrSet);
@@ -221,4 +231,26 @@ public class ImportExecutor {
         this.manualOverride = manualOverride;
     }
 
+    private final class MyBanrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
+        public MyBanrClassificationCheckMapper() {
+            super("Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr", "Text" }, "Banr");
+        }
+
+        @Override
+        public String getClassificationColumnForSourceColumn(String sourceColumn) {
+            // default to same name
+            String returnValue = sourceColumn;
+            // else map here
+            if ("TabmicroorganismId".equals(sourceColumn)) {
+                returnValue = "TabmicroorganismId";
+            }
+            return returnValue;
+        }
+    }
+
+    private final class MyAlnrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
+        public MyAlnrClassificationCheckMapper() {
+            super("Klass_Location", "TabLocation", new String[] { "TabLocationId", "Alnr", "Text" }, "Alnr");
+        }
+    }
 }

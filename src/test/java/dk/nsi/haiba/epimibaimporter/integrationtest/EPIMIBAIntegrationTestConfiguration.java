@@ -71,10 +71,21 @@ public class EPIMIBAIntegrationTestConfiguration extends EPIMIBAConfiguration {
 
 		return new SimpleDriverDataSource(new Driver(), jdbcUrlPrefix + testHAIBADbName + "?createDatabaseIfNotExist=true", testHAIBADbUsername, testHAIBADbPassword);
 	}
+	
+	@Bean
+	@Qualifier("classificationDataSource")
+	public DataSource classificationDataSource() throws Exception{
+	    return haibaDataSource();
+	}
 
 	@Bean
 	public JdbcTemplate haibaJdbcTemplate(@Qualifier("haibaDataSource") DataSource ds) {
 		return new JdbcTemplate(ds);
+	}
+	
+	@Bean
+	public JdbcTemplate classificationJdbcTemplate(@Qualifier("haibaDataSource") DataSource ds) {
+	    return new JdbcTemplate(ds);
 	}
 
 	@Bean

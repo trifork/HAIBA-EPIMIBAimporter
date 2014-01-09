@@ -48,11 +48,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import dk.nsi.haiba.epimibaimporter.dao.ClassificationCheckDAO;
 import dk.nsi.haiba.epimibaimporter.dao.HAIBADAO;
+import dk.nsi.haiba.epimibaimporter.dao.impl.ClassificationCheckDAOImpl;
 import dk.nsi.haiba.epimibaimporter.dao.impl.HAIBADAOImpl;
 import dk.nsi.haiba.epimibaimporter.email.EmailSender;
 import dk.nsi.haiba.epimibaimporter.importer.ImportExecutor;
 import dk.nsi.haiba.epimibaimporter.message.MessageResolver;
+import dk.nsi.haiba.epimibaimporter.status.CurrentImportProgress;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepository;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepositoryJdbcImpl;
 import dk.nsi.haiba.epimibaimporter.status.TimeSource;
@@ -69,7 +72,9 @@ public class EPIMIBAConfiguration {
 
     @Value("${jdbc.haibaJNDIName}")
     private String haibaJdbcJNDIName;
-    
+    @Value("${jdbc.classificationJNDIName}")
+    private String classificationJdbcJNDIName;
+
     @Value("${smtp.host}")
     private String smtpHost;
     @Value("${smtp.port}")
@@ -101,6 +106,21 @@ public class EPIMIBAConfiguration {
         factory.setExpectedType(DataSource.class);
         factory.afterPropertiesSet();
         return (DataSource) factory.getObject();
+    }
+
+    @Bean
+    @Qualifier("classificationDataSource")
+    public DataSource classificationDataSource() throws Exception {
+        JndiObjectFactoryBean factory = new JndiObjectFactoryBean();
+        factory.setJndiName(classificationJdbcJNDIName);
+        factory.setExpectedType(DataSource.class);
+        factory.afterPropertiesSet();
+        return (DataSource) factory.getObject();
+    }
+
+    @Bean
+    public JdbcTemplate classificationJdbcTemplate(@Qualifier("classificationDataSource") DataSource ds) {
+        return new JdbcTemplate(ds);
     }
 
     @Bean
@@ -179,5 +199,17 @@ public class EPIMIBAConfiguration {
         sender.setPassword(smtpPassword);
 
         return sender;
+    }
+
+    @Bean
+    public CurrentImportProgress currentImportProgress() {
+        return new CurrentImportProgress();
+    }
+
+    @Bean
+    public ClassificationCheckDAO classificationCheckDAO(
+            @Qualifier("classificationJdbcTemplate") JdbcTemplate classificationJdbcTemplate,
+            @Qualifier("haibaJdbcTemplate") JdbcTemplate sourceJdbcTemplate) {
+        return new ClassificationCheckDAOImpl(classificationJdbcTemplate, sourceJdbcTemplate);
     }
 }

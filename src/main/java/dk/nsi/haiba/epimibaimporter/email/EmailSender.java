@@ -26,7 +26,7 @@
  */
 package dk.nsi.haiba.epimibaimporter.email;
 
-import java.util.Set;
+import java.util.Collection;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -51,7 +51,7 @@ public class EmailSender {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public void send(final Set<String> unknownBanrSet, final Set<String> unknownAlnrSet) {
+    public void send(final Collection<String> unknownBanrSet, final Collection<String> unknownAlnrSet) {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             @Override
             public void prepare(MimeMessage mimeMessage) throws Exception {

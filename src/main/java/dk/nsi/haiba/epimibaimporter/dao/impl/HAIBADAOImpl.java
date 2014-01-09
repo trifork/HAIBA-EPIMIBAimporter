@@ -385,13 +385,13 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
     public Set<String> getAndCopyUnknownBanrSet(Set<String> banrInNewAnswers) {
         Set<String> returnValue = new HashSet<String>();
         for (String banr : banrInNewAnswers) {
-            if (!rowExists("Banr", banr, "KlassMicroorganism")) {
+            if (!rowExists("Banr", banr, "Klass_microorganism")) {
                 returnValue.add(banr);
             }
         }
         if (!returnValue.isEmpty()) {
             for (String banr : returnValue) {
-                String sql = "INSERT INTO KlassMicroorganism (TabmicroorganismId, Banr, Text) "
+                String sql = "INSERT INTO Klass_microorganism (TabmicroorganismId, Banr, Text) "
                         + "SELECT TabmicroorganismId, Banr, Text FROM Tabmicroorganism "
                         + "WHERE Banr=?";
                 try {
@@ -408,13 +408,13 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
     public Set<String> getAndCopyUnknownAlnrSet(Set<String> alnrInNewAnswers) {
         Set<String> returnValue = new HashSet<String>();
         for (String alnr : alnrInNewAnswers) {
-            if (!rowExists("Alnr", alnr, "KlassLocation")) {
+            if (!rowExists("Alnr", alnr, "Klass_Location")) {
                 returnValue.add(alnr);
             }
         }
         if (!returnValue.isEmpty()) {
             for (String banr : returnValue) {
-                String sql = "INSERT INTO KlassLocation (LocationId, Alnr, Text) "
+                String sql = "INSERT INTO Klass_Location (TabLocationId, Alnr, Text) "
                         + "SELECT TabLocationId, Alnr, Text FROM TabLocation " + "WHERE Alnr=?";
                 try {
                     jdbc.update(sql, banr);
