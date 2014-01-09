@@ -46,6 +46,7 @@ import dk.nsi.haiba.epimibaimporter.model.CaseDef;
 import dk.nsi.haiba.epimibaimporter.model.Header;
 import dk.nsi.haiba.epimibaimporter.model.Isolate;
 import dk.nsi.haiba.epimibaimporter.model.Quantitative;
+import dk.nsi.haiba.epimibaimporter.status.CurrentImportProgress;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepository;
 import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
 import dk.nsi.stamdata.jaxws.generated.Answer;
@@ -76,6 +77,9 @@ public class ImportExecutor {
 
     @Autowired
     ClassificationCheckDAO classificationCheckDAO;
+    
+    @Autowired
+    CurrentImportProgress currentImportProgress;
 
     @Scheduled(cron = "${cron.import.job}")
     public void run() {
