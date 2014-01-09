@@ -148,6 +148,7 @@ public class ImportExecutor {
         Set<String> unknownBanrSet = haibaDao.getAndCopyUnknownBanrSet(banrInNewAnswers);
         Set<String> unknownAlnrSet = haibaDao.getAndCopyUnknownAlnrSet(alnrInNewAnswers);
         if (!unknownBanrSet.isEmpty() || !unknownAlnrSet.isEmpty()) {
+            log.debug("send email about new banr=" + unknownBanrSet + " or new alnr=" + unknownAlnrSet);
             emailSender.send(unknownBanrSet, unknownAlnrSet);
         }
     }

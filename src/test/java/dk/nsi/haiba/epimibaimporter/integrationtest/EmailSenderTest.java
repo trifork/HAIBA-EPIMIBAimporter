@@ -30,7 +30,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -94,6 +97,7 @@ public class EmailSenderTest {
     @Before
     public void init() {
         Logger.getLogger(ImportExecutor.class).setLevel(Level.DEBUG);
+        Logger.getLogger(EmailSender.class).setLevel(Level.DEBUG);
         Logger.getLogger(EpimibaWebserviceClient.class).setLevel(Level.DEBUG);
     }
 
@@ -135,11 +139,19 @@ public class EmailSenderTest {
 
         importExecutor.doProcess();
 
-        Mockito.verify(emailSender, Mockito.times(1)).send(Mockito.anySet(), Mockito.anySet());
+        // new, so notify
+        Set<String> unknownBanrSet = new HashSet<String>(Arrays.asList(new String[]{"2"}));
+        Set<String> unknownAlnrSet = new HashSet<String>(Arrays.asList(new String[]{"1"}));
+        Mockito.verify(emailSender, Mockito.times(1)).send(unknownBanrSet, unknownAlnrSet);
 
         count = jdbc.queryForInt("SELECT COUNT(*) FROM KlassMicroorganism");
         assertEquals("Not Empty KlassMicroorganism", 1, count);
         count = jdbc.queryForInt("SELECT COUNT(*) FROM KlassLocation");
         assertEquals("Not Empty KlassLocation", 1, count);
+        
+        importExecutor.doProcess();
+        
+        // not new, so dont notify (we still have the 1 notification)
+        Mockito.verify(emailSender, Mockito.times(1)).send(Mockito.anySet(), Mockito.anySet());
     }
 }
