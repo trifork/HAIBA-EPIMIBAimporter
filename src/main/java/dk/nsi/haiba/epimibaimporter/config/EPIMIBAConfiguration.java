@@ -74,6 +74,10 @@ public class EPIMIBAConfiguration {
     private String smtpHost;
     @Value("${smtp.port}")
     private int smtpPort;
+    @Value("${smtp.user}")
+    private String smtpUser;
+    @Value("${smtp.password}")
+    private String smtpPassword;
 
     // this is not automatically registered, see https://jira.springsource.org/browse/SPR-8539
     @Bean
@@ -171,8 +175,8 @@ public class EPIMIBAConfiguration {
 
         JavaMailSenderImpl sender = new JavaMailSenderImpl();
         sender.setJavaMailProperties(javaMailProperties);
-        sender.setUsername("haibatest@gmail.com");
-        sender.setPassword("Papkasse1");
+        sender.setUsername(smtpUser);
+        sender.setPassword(smtpPassword);
 
         return sender;
     }
