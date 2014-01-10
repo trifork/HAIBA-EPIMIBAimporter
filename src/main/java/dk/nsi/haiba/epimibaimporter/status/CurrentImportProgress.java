@@ -33,16 +33,25 @@ import java.util.Date;
 public class CurrentImportProgress {
     private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
     private StringBuffer sb;
+    private Object aMutex = new Object();
 
     public void reset() {
-        sb = new StringBuffer();
+        synchronized (aMutex) {
+            sb = new StringBuffer();
+        }
     }
 
     public void addStatusLine(String status) {
-        sb.append(dateFormat.format(new Date()) + " " + status + "\n");
+        synchronized (aMutex) {
+            sb.append(dateFormat.format(new Date()) + " " + status + "\n");
+        }
     }
 
     public String getStatus() {
-        return sb != null ? sb.toString() : "(no status)";
+        String returnValue = null;
+        synchronized (aMutex) {
+            returnValue = sb != null ? sb.toString() : "(no current import status)";
+        }
+        return returnValue;
     }
 }

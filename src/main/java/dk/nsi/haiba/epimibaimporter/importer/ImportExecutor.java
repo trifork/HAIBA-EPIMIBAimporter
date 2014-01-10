@@ -77,7 +77,7 @@ public class ImportExecutor {
 
     @Autowired
     ClassificationCheckDAO classificationCheckDAO;
-    
+
     @Autowired
     CurrentImportProgress currentImportProgress;
 
@@ -98,24 +98,31 @@ public class ImportExecutor {
         // Fetch new records from LPR contact table
         try {
             statusRepo.importStartedAt(new DateTime());
+            currentImportProgress.reset();
 
             // update tab tables first, in order to copy proper values into location/classification tables for used
             // values
+            currentImportProgress.addStatusLine("importing and storing analysis data");
             haibaDao.clearAnalysisTable();
             haibaDao.saveAnalysis(epimibaWebserviceClient.getClassifications("Analysis"));
 
+            currentImportProgress.addStatusLine("importing and storing investigation data");
             haibaDao.clearInvestigationTable();
             haibaDao.saveInvestigation(epimibaWebserviceClient.getClassifications("Investigation"));
 
+            currentImportProgress.addStatusLine("importing and storing labsection data");
             haibaDao.clearLabSectionTable();
             haibaDao.saveLabSection(epimibaWebserviceClient.getClassifications("LabSection"));
 
+            currentImportProgress.addStatusLine("importing and storing locations data");
             haibaDao.clearLocationTable();
             haibaDao.saveLocation(epimibaWebserviceClient.getClassifications("Locations"));
 
+            currentImportProgress.addStatusLine("importing and storing organization data");
             haibaDao.clearOrganizationTable();
             haibaDao.saveOrganization(epimibaWebserviceClient.getClassifications("Organization"));
 
+            currentImportProgress.addStatusLine("importing and storing microorganism data");
             haibaDao.clearMicroorganismTable();
             haibaDao.saveMicroorganism(epimibaWebserviceClient.getClassifications("Microorganism"));
 
@@ -124,6 +131,8 @@ public class ImportExecutor {
             Set<String> alnrInNewAnswers = new HashSet<String>();
             Set<String> banrInNewAnswers = new HashSet<String>();
             for (CaseDef caseDef : caseDefArray) {
+                currentImportProgress.addStatusLine("importing and storing headers for " + caseDef.getText() + "/"
+                        + caseDef.getId());
                 boolean hasAnswers = true;
                 log.debug("testing for " + caseDef);
                 while (hasAnswers) {
@@ -143,10 +152,10 @@ public class ImportExecutor {
                     }
                 }
             }
+            currentImportProgress.addStatusLine("checking for new alnr/banr");
             checkAndSendEmailOnNewImports(alnrInNewAnswers, banrInNewAnswers);
 
             statusRepo.importEndedWithSuccess(new DateTime());
-
         } catch (Exception e) {
             log.error("", e);
             statusRepo.importEndedWithFailure(new DateTime(), e.getMessage());
@@ -237,18 +246,8 @@ public class ImportExecutor {
 
     private final class MyBanrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
         public MyBanrClassificationCheckMapper() {
-            super("Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr", "Text" }, "Banr");
-        }
-
-        @Override
-        public String getClassificationColumnForSourceColumn(String sourceColumn) {
-            // default to same name
-            String returnValue = sourceColumn;
-            // else map here
-            if ("TabmicroorganismId".equals(sourceColumn)) {
-                returnValue = "TabmicroorganismId";
-            }
-            return returnValue;
+            super("Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr", "Text" },
+                    "Banr");
         }
     }
 
