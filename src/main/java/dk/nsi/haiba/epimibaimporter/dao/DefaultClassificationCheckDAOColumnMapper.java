@@ -58,6 +58,7 @@ public class DefaultClassificationCheckDAOColumnMapper implements ColumnMapper {
 
     @Override
     public String getClassificationColumnForSourceColumn(String sourceColumn) {
+        // Defaults to same
         return sourceColumn;
     }
 
@@ -65,5 +66,4 @@ public class DefaultClassificationCheckDAOColumnMapper implements ColumnMapper {
     public String getSourceIdColumn() {
         return aSourceIdColumn;
     }
-
 }
