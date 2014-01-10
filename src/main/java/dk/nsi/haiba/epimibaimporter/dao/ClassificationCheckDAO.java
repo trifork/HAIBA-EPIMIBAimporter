@@ -38,7 +38,7 @@ public interface ClassificationCheckDAO {
      *            - the column name of the classification id in the classification table
      * @param mapper
      *            - the mapper used to copy from source table to destination table (includes classification table name)
-     * @return
+     * @return a filtered list of classificationIds not present at the time of the invokation (but copied now)
      */
     public Collection<String> checkClassifications(Collection<String> classificationIds, String classificationColumn,
             ColumnMapper mapper);
