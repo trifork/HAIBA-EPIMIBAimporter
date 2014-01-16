@@ -56,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 import dk.nsi.haiba.epimibaimporter.email.EmailSender;
 import dk.nsi.haiba.epimibaimporter.importer.ImportExecutor;
 import dk.nsi.haiba.epimibaimporter.model.Classification;
+import dk.nsi.haiba.epimibaimporter.status.CurrentImportProgress;
 import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
 import dk.nsi.stamdata.jaxws.generated.Answer;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPIsolate;
@@ -65,7 +66,7 @@ import dk.nsi.stamdata.jaxws.generated.PIsolate;
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional("haibaTransactionManager")
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class EmailSenderTest {
+public class EmailSenderIT {
     @Configuration
     @PropertySource("classpath:test.properties")
     @Import(EPIMIBAIntegrationTestConfiguration.class)
@@ -93,6 +94,9 @@ public class EmailSenderTest {
     @Autowired
     @Qualifier("haibaJdbcTemplate")
     JdbcTemplate jdbc;
+    
+    @Autowired
+    CurrentImportProgress currentImportProgress;
 
     @Before
     public void init() {
@@ -150,6 +154,7 @@ public class EmailSenderTest {
         assertEquals("Not Empty KlassLocation", 1, count);
         
         importExecutor.doProcess();
+        System.out.println(currentImportProgress.getStatus());
         
         // not new, so dont notify (we still have the 1 notification)
         Mockito.verify(emailSender, Mockito.times(1)).send(Mockito.anySet(), Mockito.anySet());

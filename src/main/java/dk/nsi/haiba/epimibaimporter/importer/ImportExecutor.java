@@ -138,6 +138,8 @@ public class ImportExecutor {
                 while (hasAnswers) {
                     long latestTransactionId = haibaDao.getLatestTransactionId(caseDef.getId());
                     List<Answer> answers = epimibaWebserviceClient.getAnswers(latestTransactionId + 1, caseDef.getId());
+                    currentImportProgress.addStatusLine("read  " + (answers != null ? answers.size() : 0)
+                            + " answers for " + caseDef.getText());
                     if (answers == null || answers.size() == 0) {
                         log.debug("No more answers on " + caseDef);
                         hasAnswers = false;

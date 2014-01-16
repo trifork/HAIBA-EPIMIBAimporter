@@ -48,91 +48,98 @@ import dk.nsi.haiba.epimibaimporter.importer.ImportExecutor;
 @Controller
 @Scope("request")
 public class StatusReporter {
-	
-	@Autowired
-	ImportStatusRepository statusRepo;
 
-	@Autowired
-	ImportExecutor importExecutor;
+    @Autowired
+    ImportStatusRepository statusRepo;
 
-	@Value("${cron.import.job}")
-	String cron;
+    @Autowired
+    ImportExecutor importExecutor;
 
-	@Autowired 
-	private HttpServletRequest request;
-	
-	@RequestMapping(value = "/status")
-	public ResponseEntity<String> reportStatus() {
+    @Value("${cron.import.job}")
+    String cron;
 
-		String manual = request.getParameter("manual");
-		if(manual == null || manual.trim().length() == 0) {
-			// no value set, use default set in the import executor
-			manual = ""+importExecutor.isManualOverride();
-		} else {
-			// manual flag is set on the request
-			if(manual.equalsIgnoreCase("true")) {
-				// flag is true, start the importer in a new thread
-				importExecutor.setManualOverride(true);
-		        Runnable importer = new Runnable() {
-		            public void run() {
-		            	importExecutor.doProcess();
-		            }
-		        }; 
-		        importer.run();
-			} else {
-				importExecutor.setManualOverride(false);
-			}
-		}
-		
-		HttpHeaders headers = new HttpHeaders();
-		String body = "OK";
-		HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-		body = "OK";
-		
-		try {
-			if (!statusRepo.isHAIBADBAlive()) {
-				body = "HAIBA Database is _NOT_ running correctly";
-			} else if (statusRepo.isOverdue()) {
-				// last run information is applied to body later
-				body = "Is overdue";
-			} else {
-				status = HttpStatus.OK;
-			}
-		} catch (Exception e) {
-			body = e.getMessage();
-		}
+    @Autowired
+    private HttpServletRequest request;
 
-		body += "</br>";
-		body = addLastRunInformation(body);
-		
-		body += "</br>------------------</br>";
-		
-		String url = request.getRequestURL().toString();
-		
-		body += "<a href=\""+url+"?manual=true\">Manual start importer</a>";
-		body += "</br>";
-		body += "<a href=\""+url+"?manual=false\">Scheduled start importer</a>";
-		body += "</br>";
-		if(manual.equalsIgnoreCase("true")) {
-			body += "status: MANUAL";
-		} else {
-			// default
-			body += "status: SCHEDULED - "+cron;
-		}
+    @Autowired
+    CurrentImportProgress currentImportProgress;
 
-		headers.setContentType(MediaType.TEXT_HTML);
-		
-		return new ResponseEntity<String>(body, headers, status);
-	}
+    @RequestMapping(value = "/status")
+    public ResponseEntity<String> reportStatus() {
 
-	
-	private String addLastRunInformation(String body) {
-		ImportStatus latestStatus = statusRepo.getLatestStatus();
-		if (latestStatus == null) {
-			return body + "\nLast import: Never run";
-		} else {
-			return body + "\n" + latestStatus.toString();
-		}
-	}
-	
+        String manual = request.getParameter("manual");
+        if (manual == null || manual.trim().length() == 0) {
+            // no value set, use default set in the import executor
+            manual = "" + importExecutor.isManualOverride();
+        } else {
+            // manual flag is set on the request
+            if (manual.equalsIgnoreCase("true")) {
+                // flag is true, start the importer in a new thread
+                importExecutor.setManualOverride(true);
+                Runnable importer = new Runnable() {
+                    public void run() {
+                        importExecutor.doProcess();
+                    }
+                };
+                importer.run();
+            } else {
+                importExecutor.setManualOverride(false);
+            }
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        String body = "OK";
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        body = "OK";
+
+        try {
+            if (!statusRepo.isHAIBADBAlive()) {
+                body = "HAIBA Database is _NOT_ running correctly";
+            } else if (statusRepo.isOverdue()) {
+                // last run information is applied to body later
+                body = "Is overdue";
+            } else {
+                status = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            body = e.getMessage();
+        }
+
+        body += "</br>";
+        body = addLastRunInformation(body);
+
+        body += "</br>------------------</br>";
+
+        String importProgress = currentImportProgress.getStatus();
+        body += importProgress;
+        
+        body += "</br>------------------</br>";
+
+        String url = request.getRequestURL().toString();
+
+        body += "<a href=\"" + url + "?manual=true\">Manual start importer</a>";
+        body += "</br>";
+        body += "<a href=\"" + url + "?manual=false\">Scheduled start importer</a>";
+        body += "</br>";
+        if (manual.equalsIgnoreCase("true")) {
+            body += "status: MANUAL";
+        } else {
+            // default
+            body += "status: SCHEDULED - " + cron;
+        }
+
+        headers.setContentType(MediaType.TEXT_HTML);
+
+        return new ResponseEntity<String>(body, headers, status);
+    }
+
+    private String addLastRunInformation(String body) {
+        ImportStatus latestStatus = statusRepo.getLatestStatus();
+        if (latestStatus == null) {
+            return body + "\nLast import: Never run";
+        } else {
+            return body + "\n" + latestStatus.toString();
+        }
+    }
+
 }
