@@ -1,7 +1,7 @@
-CREATE TABLE BakHeader (
+CREATE TABLE Header (
 	   HeaderId BIGINT NOT NULL PRIMARY KEY,
        Cprnr varchar(10),
-       Extid varchar(30),
+       Extid varchar(255),
        Refnr varchar(50),
        Labnr BIGINT,
        Lar BIGINT,
@@ -9,23 +9,24 @@ CREATE TABLE BakHeader (
        Indate datetime,
        Prdate datetime,
        Result varchar(50),
-       EvaluationText varchar(255),
+       Evaluation varchar(255),
        Usnr varchar(50),
-       Alnr varchar(50),
+       Alnr varchar(200),
        Stnr varchar(50),
        Avd varchar(50),
-       Mgkod varchar(50)
+       Mgkod varchar(300),
+       HAIBACaseDef char(4),
 );
 
-CREATE TABLE BakIsolate (
-	   IsolateId BIGINT NOT NULL PRIMARY KEY,
+CREATE TABLE Isolate (
+       IsolateId BIGINT NOT NULL PRIMARY KEY,
+       Banr varchar(50),
        Quantity varchar(500),
        HeaderId BIGINT
 );
 
-
-CREATE TABLE BakQuantitative (
-	   QuantitativeId BIGINT NOT NULL PRIMARY KEY,
+CREATE TABLE Quantitative (
+       QuantitativeId BIGINT NOT NULL PRIMARY KEY,
        Analysis varchar(50),
        Comment varchar(1000),
        EvaluationText varchar(50),
@@ -34,40 +35,10 @@ CREATE TABLE BakQuantitative (
        HeaderId BIGINT
 );
 
-CREATE TABLE CDHeader (
-	   HeaderId BIGINT NOT NULL PRIMARY KEY,
-       Cprnr varchar(10),
-       Extid varchar(30),
-       Refnr varchar(50),
-       Labnr BIGINT,
-       Lar BIGINT,
-       Pname varchar(150),
-       Indate datetime,
-       Prdate datetime,
-       Result varchar(50),
-       EvaluationText varchar(255),
-       Usnr varchar(50),
-       Alnr varchar(50),
-       Stnr varchar(50),
-       Avd varchar(50),
-       Mgkod varchar(50)
-);
-
-CREATE TABLE CDIsolate (
-	   IsolateId BIGINT NOT NULL PRIMARY KEY,
-       Quantity varchar(500),
-       HeaderId BIGINT
-);
-
-
-CREATE TABLE CDQuantitative (
-	   QuantitativeId BIGINT NOT NULL PRIMARY KEY,
-       Analysis varchar(50),
-       Comment varchar(1000),
-       EvaluationText varchar(50),
-       Qtnr varchar(50),
-       Quantity varchar(50),
-       HeaderId BIGINT
+-- must be populated manually, 119="Bakteriæmi" etc.
+CREATE TABLE CaseDef (
+       Id BIGINT NOT NULL PRIMARY KEY,
+       Text varchar(1000)
 );
 
 CREATE TABLE Tabmicroorganism (
@@ -123,3 +94,17 @@ CREATE TABLE EpimibaTransaction (
        TransactionType BIGINT NOT NULL
 );
 
+-- other database
+CREATE TABLE Klass_microorganism (
+    TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
+    Banr varchar(50) NOT NULL,
+    Text varchar(300) NULL,
+    H_BAKT_MICRO float NULL
+);
+
+CREATE TABLE Klass_Location (
+    TabLocationId BIGINT(15) NOT NULL PRIMARY KEY,
+    Alnr varchar(50) NOT NULL,
+    Text varchar(300) NULL,
+    H_SAAR_LOC float NULL
+);

@@ -44,20 +44,6 @@ CREATE TABLE IF NOT EXISTS CaseDef (
        Text varchar(1000)
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS Klass_microorganism (
-	TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
-    Banr varchar(50) NOT NULL,
-    Text varchar(300) NULL,
-    H_BAKT_MICRO float NULL
-) ENGINE=InnoDB COLLATE=utf8_bin;
-
-CREATE TABLE IF NOT EXISTS Klass_Location (
-    TabLocationId BIGINT(15) NOT NULL PRIMARY KEY,
-    Text varchar(300) NULL,
-    Alnr varchar(200) NOT NULL,
-    H_SAAR_LOC float NULL
-) ENGINE=InnoDB COLLATE=utf8_bin;
-
 CREATE TABLE IF NOT EXISTS Tabmicroorganism (
 	   TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
        Banr varchar(50),
@@ -111,3 +97,17 @@ CREATE TABLE IF NOT EXISTS EpimibaTransaction (
        TransactionType BIGINT(15) NOT NULL
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
+-- other database
+CREATE TABLE IF NOT EXISTS Klass_microorganism (
+    TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
+    Banr varchar(50) NOT NULL,
+    Text varchar(300) NULL,
+    H_BAKT_MICRO float NULL
+) ENGINE=InnoDB COLLATE=utf8_bin;
+
+CREATE TABLE IF NOT EXISTS Klass_Location (
+    TabLocationId BIGINT(15) NOT NULL PRIMARY KEY,
+    Alnr varchar(200) NOT NULL,
+    Text varchar(300) NULL,
+    H_SAAR_LOC float NULL
+) ENGINE=InnoDB COLLATE=utf8_bin;
