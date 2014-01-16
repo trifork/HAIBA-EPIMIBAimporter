@@ -277,7 +277,7 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
         log.debug("** Inserting " + codeList.size() + " Microorganism classifications");
         for (Classification c : codeList) {
 
-            String sql = "INSERT INTO TabMicroorganism (TabMicroorganismId, Banr, Text) VALUES(?,?,?)";
+            String sql = "INSERT INTO Tabmicroorganism (TabMicroorganismId, Banr, Text) VALUES(?,?,?)";
 
             Object[] args = new Object[] { c.getId(), c.getCode(), c.getText() };
             jdbc.update(sql, args);
