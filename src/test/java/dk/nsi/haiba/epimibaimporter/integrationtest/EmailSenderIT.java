@@ -153,8 +153,8 @@ public class EmailSenderIT {
         count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Location");
         assertEquals("Not Empty KlassLocation", 1, count);
         
-        importExecutor.doProcess();
         System.out.println(currentImportProgress.getStatus());
+        importExecutor.doProcess();
         
         // not new, so dont notify (we still have the 1 notification)
         Mockito.verify(emailSender, Mockito.times(1)).send(Mockito.anySet(), Mockito.anySet());

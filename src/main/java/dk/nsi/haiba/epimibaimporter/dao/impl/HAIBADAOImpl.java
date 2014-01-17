@@ -28,10 +28,9 @@ package dk.nsi.haiba.epimibaimporter.dao.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,10 +73,10 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
                 sql = "INSERT INTO Header (Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, Evaluation, Usnr, Alnr, Stnr, Avd, Mgkod, HAIBACaseDef, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
 
-            Object[] args = new Object[] { header.getCprnr(), header.getExtid(),
-                    header.getRefnr(), header.getLabnr(), header.getLar(), header.getPname(), header.getInDate(),
-                    header.getPrDate(), header.getResult(), header.getEvaluationText(), header.getUsnr(),
-                    header.getAlnr(), header.getStnr(), header.getAvd(), header.getMgkod(), header.getCaseDef(), header.getHeaderId()};
+            Object[] args = new Object[] { header.getCprnr(), header.getExtid(), header.getRefnr(), header.getLabnr(),
+                    header.getLar(), header.getPname(), header.getInDate(), header.getPrDate(), header.getResult(),
+                    header.getEvaluationText(), header.getUsnr(), header.getAlnr(), header.getStnr(), header.getAvd(),
+                    header.getMgkod(), header.getCaseDef(), header.getHeaderId() };
 
             jdbc.update(sql, args);
 
@@ -117,12 +116,12 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
 
             String sql = null;
             if (isolateIdExists(isolate.getIsolateId(), headerId, "Isolate")) {
-                sql = "UPDATE Isolate set Quantity=?, HeaderId=? where IsolateId=?";
+                sql = "UPDATE Isolate set Quantity=?, HeaderId=?, Banr=? where IsolateId=?";
             } else {
-                sql = "INSERT INTO Isolate (Quantity, HeaderId, IsolateId) VALUES (?, ?, ?)";
+                sql = "INSERT INTO Isolate (Quantity, HeaderId, Banr, IsolateId) VALUES (?, ?, ?, ?)";
             }
 
-            Object[] args = new Object[] { isolate.getQuantity(), headerId, isolate.getIsolateId() };
+            Object[] args = new Object[] { isolate.getQuantity(), headerId, isolate.getBanr(), isolate.getIsolateId() };
             jdbc.update(sql, args);
         }
         log.debug("** Saved Isolates");
@@ -359,5 +358,25 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
             }
         });
         return returnValue.toArray(new CaseDef[0]);
+    }
+
+    @Override
+    public Collection<String> getAllAlnr() {
+        Collection<String> returnValue = null;
+        log.debug("** querying for Alnr");
+        String sql = "SELECT DISTINCT Alnr FROM Header";
+        returnValue = jdbc.queryForList(sql, String.class);
+        log.trace("getAllAlnr returns " + returnValue);
+        return returnValue;
+    }
+
+    @Override
+    public Collection<String> getAllBanr() {
+        Collection<String> returnValue = null;
+        log.debug("** querying for Banr");
+        String sql = "SELECT DISTINCT Banr FROM Isolate";
+        returnValue = jdbc.queryForList(sql, String.class);
+        log.trace("getAllBanr returns " + returnValue);
+        return returnValue;
     }
 }

@@ -26,43 +26,46 @@
  */
 package dk.nsi.haiba.epimibaimporter.dao;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import dk.nsi.haiba.epimibaimporter.exception.DAOException;
 import dk.nsi.haiba.epimibaimporter.model.CaseDef;
 import dk.nsi.haiba.epimibaimporter.model.Classification;
 import dk.nsi.haiba.epimibaimporter.model.Header;
 
-
 public interface HAIBADAO {
-	long getLatestTransactionId(int caseDef) throws DAOException;
+    long getLatestTransactionId(int caseDef) throws DAOException;
 
-	void saveHeader(Header header, long transactionId, int caseDef) throws DAOException;
+    void saveHeader(Header header, long transactionId, int caseDef) throws DAOException;
 
-	void saveAnalysis(List<Classification> codeList) throws DAOException;
+    void saveAnalysis(List<Classification> codeList) throws DAOException;
 
-	void saveInvestigation(List<Classification> codeList) throws DAOException;
+    void saveInvestigation(List<Classification> codeList) throws DAOException;
 
-	void saveLabSection(List<Classification> codeList) throws DAOException;
+    void saveLabSection(List<Classification> codeList) throws DAOException;
 
-	void saveLocation(List<Classification> codeList) throws DAOException;
+    void saveLocation(List<Classification> codeList) throws DAOException;
 
-	void saveOrganization(List<Classification> codeList) throws DAOException;
+    void saveOrganization(List<Classification> codeList) throws DAOException;
 
-	void saveMicroorganism(List<Classification> codeList) throws DAOException;
+    void saveMicroorganism(List<Classification> codeList) throws DAOException;
 
-	void clearAnalysisTable() throws DAOException;
+    void clearAnalysisTable() throws DAOException;
 
-	void clearInvestigationTable() throws DAOException;
+    void clearInvestigationTable() throws DAOException;
 
-	void clearLabSectionTable() throws DAOException;
+    void clearLabSectionTable() throws DAOException;
 
-	void clearLocationTable() throws DAOException;
+    void clearLocationTable() throws DAOException;
 
-	void clearOrganizationTable() throws DAOException;
+    void clearOrganizationTable() throws DAOException;
 
-	void clearMicroorganismTable() throws DAOException;
+    void clearMicroorganismTable() throws DAOException;
 
     CaseDef[] getCaseDefs();
+
+    Collection<String> getAllAlnr();
+
+    Collection<String> getAllBanr();
 }

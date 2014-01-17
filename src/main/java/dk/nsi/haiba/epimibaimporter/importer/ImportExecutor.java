@@ -27,10 +27,10 @@
 package dk.nsi.haiba.epimibaimporter.importer;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -81,6 +81,8 @@ public class ImportExecutor {
     @Autowired
     CurrentImportProgress currentImportProgress;
 
+    private Comparator<? super Answer> aSortAnswersByTransactionIdComparator = new SortAnswersByTransactionIdComparator();
+
     @Scheduled(cron = "${cron.import.job}")
     public void run() {
         if (!isManualOverride()) {
@@ -128,8 +130,6 @@ public class ImportExecutor {
 
             // iterate through case definitions from casedef table
             CaseDef[] caseDefArray = haibaDao.getCaseDefs();
-            Set<String> alnrInNewAnswers = new HashSet<String>();
-            Set<String> banrInNewAnswers = new HashSet<String>();
             for (CaseDef caseDef : caseDefArray) {
                 currentImportProgress.addStatusLine("importing and storing headers for " + caseDef.getText() + "/"
                         + caseDef.getId());
@@ -138,7 +138,11 @@ public class ImportExecutor {
                 while (hasAnswers) {
                     long latestTransactionId = haibaDao.getLatestTransactionId(caseDef.getId());
                     List<Answer> answers = epimibaWebserviceClient.getAnswers(latestTransactionId + 1, caseDef.getId());
-                    currentImportProgress.addStatusLine("read  " + (answers != null ? answers.size() : 0)
+                    // be sure that answers are sorted by transaction id - else failure/recovery breaks as unordered
+                    // transaction ids allows answers overtaking each other and potentially prohibiting fetching of all
+                    // answers
+                    Collections.sort(answers, aSortAnswersByTransactionIdComparator);
+                    currentImportProgress.addStatusLine("read " + (answers != null ? answers.size() : 0)
                             + " answers for " + caseDef.getText());
                     if (answers == null || answers.size() == 0) {
                         log.debug("No more answers on " + caseDef);
@@ -148,14 +152,16 @@ public class ImportExecutor {
                         for (Answer answer : answers) {
                             log.debug(answer.getCprnr());
                             Header header = getHeader(answer);
-                            updateAlnrBanr(header, alnrInNewAnswers, banrInNewAnswers);
                             haibaDao.saveHeader(header, answer.getTransactionID().longValue(), caseDef.getId());
                         }
                     }
                 }
             }
             currentImportProgress.addStatusLine("checking for new alnr/banr");
+            Collection<String> alnrInNewAnswers = haibaDao.getAllAlnr();
+            Collection<String> banrInNewAnswers = haibaDao.getAllBanr();
             checkAndSendEmailOnNewImports(alnrInNewAnswers, banrInNewAnswers);
+            currentImportProgress.addStatusLine("done");
 
             statusRepo.importEndedWithSuccess(new DateTime());
         } catch (Exception e) {
@@ -164,26 +170,26 @@ public class ImportExecutor {
         }
     }
 
-    private void checkAndSendEmailOnNewImports(Set<String> alnrInNewAnswers, Set<String> banrInNewAnswers) {
+    private void checkAndSendEmailOnNewImports(Collection<String> alnrInNewAnswers, Collection<String> banrInNewAnswers) {
         Collection<String> unknownBanrSet = classificationCheckDAO.checkClassifications(banrInNewAnswers, "Banr",
                 new MyBanrClassificationCheckMapper());
         Collection<String> unknownAlnrSet = classificationCheckDAO.checkClassifications(alnrInNewAnswers, "Alnr",
                 new MyAlnrClassificationCheckMapper());
 
-        // Set<String> unknownBanrSet = haibaDao.getAndCopyUnknownBanrSet(banrInNewAnswers);
-        // Set<String> unknownAlnrSet = haibaDao.getAndCopyUnknownAlnrSet(alnrInNewAnswers);
         if (!unknownBanrSet.isEmpty() || !unknownAlnrSet.isEmpty()) {
+            currentImportProgress.addStatusLine("sending email about " + unknownBanrSet.size() + " new banr and "
+                    + unknownAlnrSet.size() + " new alnr to " + emailSender.getTo());
             log.debug("send email about new banr=" + unknownBanrSet + " or new alnr=" + unknownAlnrSet);
             emailSender.send(unknownBanrSet, unknownAlnrSet);
         }
     }
 
-    private void updateAlnrBanr(Header header, Set<String> alnrInNewAnswers, Set<String> banrInNewAnswers) {
-        alnrInNewAnswers.add(header.getAlnr());
-        for (Isolate isolate : header.getIsolates()) {
-            banrInNewAnswers.add(isolate.getBanr());
-        }
-    }
+    // private void updateAlnrBanr(Header header, Set<String> alnrInNewAnswers, Set<String> banrInNewAnswers) {
+    // alnrInNewAnswers.add(header.getAlnr());
+    // for (Isolate isolate : header.getIsolates()) {
+    // banrInNewAnswers.add(isolate.getBanr());
+    // }
+    // }
 
     private Header getHeader(Answer answer) {
         Header h = new Header();
@@ -256,6 +262,13 @@ public class ImportExecutor {
     private final class MyAlnrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
         public MyAlnrClassificationCheckMapper() {
             super("Klass_Location", "TabLocation", new String[] { "TabLocationId", "Alnr", "Text" }, "Alnr");
+        }
+    }
+
+    public static class SortAnswersByTransactionIdComparator implements Comparator<Answer> {
+        @Override
+        public int compare(Answer a1, Answer a2) {
+            return a1.getTransactionID().compareTo(a2.getTransactionID());
         }
     }
 }
