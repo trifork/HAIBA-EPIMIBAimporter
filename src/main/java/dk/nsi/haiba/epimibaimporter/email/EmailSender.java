@@ -94,4 +94,8 @@ public class EmailSender {
         };
         javaMailSender.send(preparator);
     }
+    
+    public String getTo() {
+        return to_commaseparated;
+    }
 }
