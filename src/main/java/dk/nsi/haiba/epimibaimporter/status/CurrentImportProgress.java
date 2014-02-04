@@ -34,6 +34,7 @@ public class CurrentImportProgress {
     private DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
     private StringBuffer sb;
     private Object aMutex = new Object();
+    private boolean aProgressDot;
 
     public void reset() {
         synchronized (aMutex) {
@@ -43,10 +44,22 @@ public class CurrentImportProgress {
 
     public void addStatusLine(String status) {
         synchronized (aMutex) {
-            sb.append(dateFormat.format(new Date()) + " " + status + "\n");
+            if (aProgressDot) {
+                // break line to end progress
+                sb.append("<br/>");
+            }
+            sb.append(dateFormat.format(new Date()) + " " + status + "<br/>");
+            aProgressDot = false;
         }
     }
-
+    
+    public void addProgressDot() {
+        synchronized (aMutex) {
+            aProgressDot = true;
+            sb.append(".");
+        }
+    }
+    
     public String getStatus() {
         String returnValue = null;
         synchronized (aMutex) {

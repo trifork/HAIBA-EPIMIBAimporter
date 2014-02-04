@@ -135,6 +135,7 @@ public class ImportExecutor {
                         + caseDef.getId());
                 boolean hasAnswers = true;
                 log.debug("testing for " + caseDef);
+                String lastStatus = null;
                 while (hasAnswers) {
                     long latestTransactionId = haibaDao.getLatestTransactionId(caseDef.getId());
                     List<Answer> answers = epimibaWebserviceClient.getAnswers(latestTransactionId + 1, caseDef.getId());
@@ -142,8 +143,13 @@ public class ImportExecutor {
                     // transaction ids allows answers overtaking each other and potentially prohibiting fetching of all
                     // answers
                     Collections.sort(answers, aSortAnswersByTransactionIdComparator);
-                    currentImportProgress.addStatusLine("read " + (answers != null ? answers.size() : 0)
-                            + " answers for " + caseDef.getText());
+                    String status = "read " + (answers != null ? answers.size() : 0) + " answers for "
+                            + caseDef.getText();
+                    if (status.equals(lastStatus)) {
+                        currentImportProgress.addProgressDot();
+                    } else {
+                        currentImportProgress.addStatusLine(status);
+                    }
                     if (answers == null || answers.size() == 0) {
                         log.debug("No more answers on " + caseDef);
                         hasAnswers = false;
@@ -151,8 +157,12 @@ public class ImportExecutor {
                         log.debug("got " + answers.size());
                         for (Answer answer : answers) {
                             log.debug(answer.getCprnr());
-                            Header header = getHeader(answer);
-                            haibaDao.saveHeader(header, answer.getTransactionID().longValue(), caseDef.getId());
+                            if (!answer.isTestPt()) {
+                                Header header = getHeader(answer);
+                                haibaDao.saveHeader(header, answer.getTransactionID().longValue(), caseDef.getId());
+                            } else {
+                                log.debug("not saving header for test patient " + answer.getCprnr());
+                            }
                         }
                     }
                 }
