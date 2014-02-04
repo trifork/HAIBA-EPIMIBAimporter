@@ -76,9 +76,9 @@ public class ClassificationCheckDAOImpl extends CommonDAO implements Classificat
     public Collection<String> checkClassifications(Collection<String> classificationIds, String classificationColumn,
             final ColumnMapper mapper) {
         Set<String> returnValue = new HashSet<String>();
-        for (String alnr : classificationIds) {
-            if (!rowExists(classificationColumn, alnr, mapper.getClassificationTable())) {
-                returnValue.add(alnr);
+        for (String id : classificationIds) {
+            if (!rowExists(classificationColumn, id, mapper.getClassificationTable())) {
+                returnValue.add(id);
             }
         }
         if (!returnValue.isEmpty()) {
