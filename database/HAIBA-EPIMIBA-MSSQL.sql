@@ -82,9 +82,7 @@ CREATE TABLE EpimibaImporterStatus (
     StartTime DATETIME NOT NULL,
     EndTime DATETIME,
     Outcome VARCHAR(20),
-    ErrorMessage VARCHAR(200),
-
-    INDEX (StartTime)
+    ErrorMessage VARCHAR(200)
 );
 
 CREATE TABLE EpimibaTransaction (
@@ -96,14 +94,14 @@ CREATE TABLE EpimibaTransaction (
 
 -- other database
 CREATE TABLE Klass_microorganism (
-    TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
+    TabmicroorganismId BIGINT NOT NULL PRIMARY KEY,
     Banr varchar(50) NOT NULL,
     Text varchar(300) NULL,
     H_BAKT_MICRO float NULL
 );
 
 CREATE TABLE Klass_Location (
-    TabLocationId BIGINT(15) NOT NULL PRIMARY KEY,
+    TabLocationId BIGINT NOT NULL PRIMARY KEY,
     Alnr varchar(50) NOT NULL,
     Text varchar(300) NULL,
     H_SAAR_LOC float NULL
