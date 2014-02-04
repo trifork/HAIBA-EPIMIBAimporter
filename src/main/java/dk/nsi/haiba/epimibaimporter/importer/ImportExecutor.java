@@ -157,7 +157,7 @@ public class ImportExecutor {
                         log.debug("got " + answers.size());
                         for (Answer answer : answers) {
                             log.debug(answer.getCprnr());
-                            if (!answer.isTestPt()) {
+                            if (answer.isTestPt() == null || !answer.isTestPt()) {
                                 Header header = getHeader(answer);
                                 haibaDao.saveHeader(header, answer.getTransactionID().longValue(), caseDef.getId());
                             } else {
