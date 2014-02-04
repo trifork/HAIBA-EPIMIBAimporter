@@ -80,6 +80,7 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
 
             jdbc.update(sql, args);
 
+            // XXX also include CaseDef, tlf. 31 jan
             saveIsolates(header.getIsolates(), header.getHeaderId());
             saveQuantitatives(header.getQuantitatives(), header.getHeaderId());
 
