@@ -56,8 +56,8 @@ public class EmailSender {
             @Override
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
-                messageHelper.setValidateAddresses(true); 
-                
+                messageHelper.setValidateAddresses(true);
+
                 String[] split = to_commaseparated.split(",");
                 for (String emailAddress : split) {
                     emailAddress = emailAddress.trim();
@@ -71,30 +71,31 @@ public class EmailSender {
                 }
                 messageHelper.setFrom(from);
                 messageHelper.setSubject("EPIMIBA: Notification on unknown table entries");
-                String html = "<h2>After the recent import, the following unknown table entries are discovered:</h2>";
+                String not_html = "After the recent import, the following unknown table entries are discovered:\n";
                 if (!unknownAlnrSet.isEmpty()) {
-                    html += "<h2>alnr:</h2><br><ul>";
+                    not_html += "-----\n";
+                    not_html += "alnr:\n";
+                    String delim = "";
                     for (String alnr : unknownAlnrSet) {
-                        html += "<li>" + alnr + "</li>";
+                        not_html += delim + alnr;
+                        delim = ", ";
                     }
-                    html += "</ul>";
                 }
                 if (!unknownBanrSet.isEmpty()) {
-                    if (!html.isEmpty()) {
-                        html += "<br>";
-                    }
-                    html += "<h2>banr:</h2><br><ul>";
+                    not_html += "-----\n";
+                    not_html += "banr:\n";
+                    String delim = "";
                     for (String banr : unknownBanrSet) {
-                        html += "<li>" + banr + "</li>";
+                        not_html += delim + banr;
+                        delim = ", ";
                     }
-                    html += "</ul>";
                 }
-                messageHelper.setText(html, true);
+                messageHelper.setText(not_html, false);
             }
         };
         javaMailSender.send(preparator);
     }
-    
+
     public String getTo() {
         return to_commaseparated;
     }
