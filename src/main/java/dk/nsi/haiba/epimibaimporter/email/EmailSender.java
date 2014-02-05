@@ -80,6 +80,7 @@ public class EmailSender {
                         not_html += delim + alnr;
                         delim = ", ";
                     }
+                    not_html+="\n";
                 }
                 if (!unknownBanrSet.isEmpty()) {
                     not_html += "-----\n";
@@ -89,6 +90,7 @@ public class EmailSender {
                         not_html += delim + banr;
                         delim = ", ";
                     }
+                    not_html+="\n";
                 }
                 messageHelper.setText(not_html, false);
             }
