@@ -100,6 +100,7 @@ public class ImportExecutor {
         // Fetch new records from LPR contact table
         try {
             statusRepo.importStartedAt(new DateTime());
+            emailSender.sendHello();
             currentImportProgress.reset();
 
             // update tab tables first, in order to copy proper values into location/classification tables for used

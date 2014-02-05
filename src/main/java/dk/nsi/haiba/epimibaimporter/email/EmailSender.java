@@ -26,7 +26,9 @@
  */
 package dk.nsi.haiba.epimibaimporter.email;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -47,11 +49,38 @@ public class EmailSender {
     private String from;
     @Value("${smtp.to_commaseparated}")
     private String to_commaseparated;
+    @Value("${smtp.sendhello}")
+    private boolean sendHello;
 
     @Autowired
     private JavaMailSender javaMailSender;
 
     public void send(final Collection<String> unknownBanrSet, final Collection<String> unknownAlnrSet) {
+        String not_html = "After the recent import, the following unknown table entries are discovered:\n";
+        if (!unknownAlnrSet.isEmpty()) {
+            not_html += "-----\n";
+            not_html += "alnr:\n";
+            String delim = "";
+            for (String alnr : unknownAlnrSet) {
+                not_html += delim + alnr;
+                delim = ", ";
+            }
+            not_html += "\n";
+        }
+        if (!unknownBanrSet.isEmpty()) {
+            not_html += "-----\n";
+            not_html += "banr:\n";
+            String delim = "";
+            for (String banr : unknownBanrSet) {
+                not_html += delim + banr;
+                delim = ", ";
+            }
+            not_html += "\n";
+        }
+        sendText("EPIMIBA: Notification on unknown table entries", not_html);
+    }
+
+    private void sendText(final String subject, final String nonHtml) {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             @Override
             public void prepare(MimeMessage mimeMessage) throws Exception {
@@ -70,29 +99,8 @@ public class EmailSender {
                     }
                 }
                 messageHelper.setFrom(from);
-                messageHelper.setSubject("EPIMIBA: Notification on unknown table entries");
-                String not_html = "After the recent import, the following unknown table entries are discovered:\n";
-                if (!unknownAlnrSet.isEmpty()) {
-                    not_html += "-----\n";
-                    not_html += "alnr:\n";
-                    String delim = "";
-                    for (String alnr : unknownAlnrSet) {
-                        not_html += delim + alnr;
-                        delim = ", ";
-                    }
-                    not_html+="\n";
-                }
-                if (!unknownBanrSet.isEmpty()) {
-                    not_html += "-----\n";
-                    not_html += "banr:\n";
-                    String delim = "";
-                    for (String banr : unknownBanrSet) {
-                        not_html += delim + banr;
-                        delim = ", ";
-                    }
-                    not_html+="\n";
-                }
-                messageHelper.setText(not_html, false);
+                messageHelper.setSubject(subject);
+                messageHelper.setText(nonHtml, false);
             }
         };
         javaMailSender.send(preparator);
@@ -100,5 +108,12 @@ public class EmailSender {
 
     public String getTo() {
         return to_commaseparated;
+    }
+
+    public void sendHello() {
+        if (sendHello) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            sendText("EPIMIBA: Import started at " + dateFormat.format(new Date()), "Have a nice day");
+        }
     }
 }
