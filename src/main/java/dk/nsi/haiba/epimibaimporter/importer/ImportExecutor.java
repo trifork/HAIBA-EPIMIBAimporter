@@ -194,13 +194,6 @@ public class ImportExecutor {
         }
     }
 
-    // private void updateAlnrBanr(Header header, Set<String> alnrInNewAnswers, Set<String> banrInNewAnswers) {
-    // alnrInNewAnswers.add(header.getAlnr());
-    // for (Isolate isolate : header.getIsolates()) {
-    // banrInNewAnswers.add(isolate.getBanr());
-    // }
-    // }
-
     private Header getHeader(Answer answer) {
         Header h = new Header();
         h.setHeaderId(answer.getHeaderId());
