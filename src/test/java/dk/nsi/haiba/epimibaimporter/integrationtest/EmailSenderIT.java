@@ -31,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,10 +72,10 @@ public class EmailSenderIT {
     @PropertySource("classpath:test.properties")
     @Import(EPIMIBAIntegrationTestConfiguration.class)
     static class TestConfiguration {
-        @Bean
-        public EmailSender emailSender() {
-            return Mockito.mock(EmailSender.class);
-        }
+         @Bean
+         public EmailSender emailSender() {
+         return Mockito.mock(EmailSender.class);
+         }
 
         @Bean
         public EpimibaWebserviceClient epimibaWebserviceClient() {
@@ -94,7 +95,7 @@ public class EmailSenderIT {
     @Autowired
     @Qualifier("haibaJdbcTemplate")
     JdbcTemplate jdbc;
-    
+
     @Autowired
     CurrentImportProgress currentImportProgress;
 
@@ -104,7 +105,12 @@ public class EmailSenderIT {
         Logger.getLogger(EmailSender.class).setLevel(Level.DEBUG);
         Logger.getLogger(EpimibaWebserviceClient.class).setLevel(Level.DEBUG);
     }
-
+    
+    @Test
+    public void simpleMailTest(){
+        emailSender.sendHello();
+    }
+    
     @Test
     public void testEmailSendOnNewEntries() {
         int count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_microorganism");
@@ -125,6 +131,18 @@ public class EmailSenderIT {
         a.setQuantitatives(new ArrayOfPQuantitative());
         a.setTransactionID(new BigInteger("17"));
         answers.add(a);
+        a = new Answer();
+        a.setHeaderId(0);
+        a.setLocationAlnr("1");
+        a.setCprnr("x");
+        pisolate = new PIsolate();
+        pisolate.setIsolateBanr("3");
+        arrayOfPIsolate = new ArrayOfPIsolate();
+        arrayOfPIsolate.getPIsolate().add(pisolate);
+        a.setIsolates(arrayOfPIsolate);
+        a.setQuantitatives(new ArrayOfPQuantitative());
+        a.setTransactionID(new BigInteger("18"));
+        answers.add(a);
         Mockito.when(epimibaWebserviceClient.getAnswers(1, 119)).thenReturn(answers);
         List<Classification> locations = new ArrayList<Classification>();
         Classification classification = new Classification();
@@ -139,23 +157,28 @@ public class EmailSenderIT {
         classification.setId(2);
         classification.setText("2");
         microorganisms.add(classification);
+        classification = new Classification();
+        classification.setCode("3");
+        classification.setId(3);
+        classification.setText("3");
+        microorganisms.add(classification);
         Mockito.when(epimibaWebserviceClient.getClassifications("Microorganism")).thenReturn(microorganisms);
 
         importExecutor.doProcess();
 
         // new, so notify
-        Set<String> unknownBanrSet = new HashSet<String>(Arrays.asList(new String[]{"2"}));
-        Set<String> unknownAlnrSet = new HashSet<String>(Arrays.asList(new String[]{"1"}));
+        Set<String> unknownBanrSet = new HashSet<String>(Arrays.asList(new String[] { "2", "3" }));
+        Set<String> unknownAlnrSet = new HashSet<String>(Arrays.asList(new String[] { "1" }));
         Mockito.verify(emailSender, Mockito.times(1)).send(unknownBanrSet, unknownAlnrSet);
 
         count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_microorganism");
-        assertEquals("Not Empty KlassMicroorganism", 1, count);
+        assertEquals("Not Empty Klass_microorganism", 2, count);
         count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Location");
-        assertEquals("Not Empty KlassLocation", 1, count);
-        
+        assertEquals("Not Empty Klass_Location", 1, count);
+
         System.out.println(currentImportProgress.getStatus());
         importExecutor.doProcess();
-        
+
         // not new, so dont notify (we still have the 1 notification)
         Mockito.verify(emailSender, Mockito.times(1)).send(Mockito.anySet(), Mockito.anySet());
     }
