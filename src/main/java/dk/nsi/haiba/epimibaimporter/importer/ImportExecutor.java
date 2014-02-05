@@ -151,6 +151,7 @@ public class ImportExecutor {
                     } else {
                         currentImportProgress.addStatusLine(status);
                     }
+                    lastStatus = status;
                     if (answers == null || answers.size() == 0) {
                         log.debug("No more answers on " + caseDef);
                         hasAnswers = false;
