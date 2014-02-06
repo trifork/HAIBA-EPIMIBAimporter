@@ -47,9 +47,16 @@ public class ClassificationCheckDAOImpl extends CommonDAO implements Classificat
     private JdbcTemplate aClassificationJdbc;
     private JdbcTemplate aSourceJdbc;
 
-    public ClassificationCheckDAOImpl(JdbcTemplate classificationJdbc, JdbcTemplate source) {
+    // really just a mssql support feature to allow easy(/ier) configuration of schemas
+    private String aSourceTablePrefix;
+    private String aClassTablePrefix;
+
+    public ClassificationCheckDAOImpl(JdbcTemplate classificationJdbc, JdbcTemplate source, String sourcePrefix,
+            String classPrefix) {
         aClassificationJdbc = classificationJdbc;
         aSourceJdbc = source;
+        aSourceTablePrefix = sourcePrefix;
+        aClassTablePrefix = classPrefix;
     }
 
     private boolean rowExists(String columnName, String value, String tableName) {
@@ -58,7 +65,8 @@ public class ClassificationCheckDAOImpl extends CommonDAO implements Classificat
             sql = "SELECT " + columnName + " FROM " + tableName + " where " + columnName + "=? LIMIT 1";
         } else {
             // MSSQL
-            sql = "SELECT TOP 1 " + columnName + " FROM " + tableName + " where " + columnName + "=?";
+            sql = "SELECT TOP 1 " + columnName + " FROM " + aClassTablePrefix + tableName + " where " + columnName
+                    + "=?";
         }
 
         try {
@@ -84,8 +92,8 @@ public class ClassificationCheckDAOImpl extends CommonDAO implements Classificat
         if (!returnValue.isEmpty()) {
             // copy
             for (String unknownId : returnValue) {
-                String sql = "SELECT " + getColumnsSql(mapper.getColumnsToCopy()) + " FROM " + mapper.getSourceTable()
-                        + " WHERE " + mapper.getSourceIdColumn() + "=?";
+                String sql = "SELECT " + getColumnsSql(mapper.getColumnsToCopy()) + " FROM " + aSourceTablePrefix
+                        + mapper.getSourceTable() + " WHERE " + mapper.getSourceIdColumn() + "=?";
                 log.debug("checkClassifications: query sql=" + sql);
                 try {
                     aSourceJdbc.query(sql, new RowCallbackHandler() {
@@ -94,8 +102,8 @@ public class ClassificationCheckDAOImpl extends CommonDAO implements Classificat
                             String[] columnsToCopy = mapper.getColumnsToCopy();
                             String destColumns = getDestColumns(mapper);
                             Object[] values = getValues(rs, columnsToCopy);
-                            String sql = "INSERT INTO " + mapper.getClassificationTable() + "(" + destColumns
-                                    + ") VALUES (" + getPlaceHoldersSql(columnsToCopy.length) + ")";
+                            String sql = "INSERT INTO " + aClassTablePrefix + mapper.getClassificationTable() + "("
+                                    + destColumns + ") VALUES (" + getPlaceHoldersSql(columnsToCopy.length) + ")";
                             log.debug("checkClassifications: insert sql=" + sql);
                             aClassificationJdbc.update(sql, values);
                         }

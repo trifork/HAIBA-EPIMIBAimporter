@@ -74,6 +74,10 @@ public class EPIMIBAConfiguration {
     private String haibaJdbcJNDIName;
     @Value("${jdbc.classificationJNDIName}")
     private String classificationJdbcJNDIName;
+    @Value("${jdbc.classificationtableprefix:}")
+    private String classificationTablePrefix;
+    @Value("${jdbc.haibatableprefix:}")
+    private String haibaTablePrefix;
 
     @Value("${smtp.host}")
     private String smtpHost;
@@ -215,6 +219,7 @@ public class EPIMIBAConfiguration {
     public ClassificationCheckDAO classificationCheckDAO(
             @Qualifier("classificationJdbcTemplate") JdbcTemplate classificationJdbcTemplate,
             @Qualifier("haibaJdbcTemplate") JdbcTemplate sourceJdbcTemplate) {
-        return new ClassificationCheckDAOImpl(classificationJdbcTemplate, sourceJdbcTemplate);
+        return new ClassificationCheckDAOImpl(classificationJdbcTemplate, sourceJdbcTemplate, haibaTablePrefix,
+                classificationTablePrefix);
     }
 }
