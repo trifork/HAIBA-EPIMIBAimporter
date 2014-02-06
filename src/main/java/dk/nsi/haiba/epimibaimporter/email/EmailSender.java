@@ -27,7 +27,9 @@
 package dk.nsi.haiba.epimibaimporter.email;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.mail.MessagingException;
@@ -41,6 +43,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 
 import dk.nsi.haiba.epimibaimporter.log.Log;
+import dk.nsi.haiba.epimibaimporter.util.AlphanumComparator;
 
 public class EmailSender {
     private static Log log = new Log(Logger.getLogger(EmailSender.class));
@@ -57,7 +60,11 @@ public class EmailSender {
 
     public void send(final Collection<String> unknownBanrSet, final Collection<String> unknownAlnrSet) {
         String not_html = "After the recent import, the following unknown table entries are discovered:\n";
-        if (!unknownAlnrSet.isEmpty()) {
+        ArrayList<String> alnrSet = new ArrayList<String>(unknownAlnrSet);
+        Collections.sort(alnrSet, AlphanumComparator.INSTANCE);
+        ArrayList<String> banrSet = new ArrayList<String>(unknownBanrSet);
+        Collections.sort(banrSet, AlphanumComparator.INSTANCE);
+        if (!alnrSet.isEmpty()) {
             not_html += "-----\n";
             not_html += "alnr:\n";
             String delim = "";
@@ -67,7 +74,7 @@ public class EmailSender {
             }
             not_html += "\n";
         }
-        if (!unknownBanrSet.isEmpty()) {
+        if (!banrSet.isEmpty()) {
             not_html += "-----\n";
             not_html += "banr:\n";
             String delim = "";
