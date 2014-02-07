@@ -31,7 +31,6 @@ import static org.junit.Assert.assertEquals;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +43,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -72,10 +72,10 @@ public class EmailSenderIT {
     @PropertySource("classpath:test.properties")
     @Import(EPIMIBAIntegrationTestConfiguration.class)
     static class TestConfiguration {
-         @Bean
-         public EmailSender emailSender() {
-         return Mockito.mock(EmailSender.class);
-         }
+        @Bean
+        public EmailSender emailSender() {
+            return Mockito.mock(EmailSender.class);
+        }
 
         @Bean
         public EpimibaWebserviceClient epimibaWebserviceClient() {
@@ -105,12 +105,12 @@ public class EmailSenderIT {
         Logger.getLogger(EmailSender.class).setLevel(Level.DEBUG);
         Logger.getLogger(EpimibaWebserviceClient.class).setLevel(Level.DEBUG);
     }
-    
+
     @Test
-    public void simpleMailTest(){
+    public void simpleMailTest() {
         emailSender.sendHello();
     }
-    
+
     @Test
     public void testEmailSendOnNewEntries() {
         int count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_microorganism");
@@ -164,7 +164,7 @@ public class EmailSenderIT {
         microorganisms.add(classification);
         Mockito.when(epimibaWebserviceClient.getClassifications("Microorganism")).thenReturn(microorganisms);
 
-        importExecutor.doProcess();
+        importExecutor.doProcess(true);
 
         // new, so notify
         Set<String> unknownBanrSet = new HashSet<String>(Arrays.asList(new String[] { "2", "3" }));
@@ -177,7 +177,7 @@ public class EmailSenderIT {
         assertEquals("Not Empty Klass_Location", 1, count);
 
         System.out.println(currentImportProgress.getStatus());
-        importExecutor.doProcess();
+        importExecutor.doProcess(true);
 
         // not new, so dont notify (we still have the 1 notification)
         Mockito.verify(emailSender, Mockito.times(1)).send(Mockito.anySet(), Mockito.anySet());
