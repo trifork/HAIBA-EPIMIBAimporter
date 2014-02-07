@@ -127,7 +127,7 @@ public class EmailSender {
     public void sendDone(String error) {
         if (sendHello) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if (error != null) {
+            if (error == null) {
                 sendText("EPIMIBA: Import done at " + dateFormat.format(new Date()), "No errors");
             } else {
                 sendText("EPIMIBA: Import done at " + dateFormat.format(new Date()), "Errors found\n:" + error);
