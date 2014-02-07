@@ -74,14 +74,8 @@ public class StatusReporter {
         } else {
             // manual flag is set on the request
             if (manual.equalsIgnoreCase("true")) {
-                // flag is true, start the importer in a new thread
                 importExecutor.setManualOverride(true);
-                Runnable importer = new Runnable() {
-                    public void run() {
-                        importExecutor.doProcess();
-                    }
-                };
-                importer.run();
+                importExecutor.doProcess(true);
             } else {
                 importExecutor.setManualOverride(false);
             }
@@ -112,7 +106,7 @@ public class StatusReporter {
 
         String importProgress = currentImportProgress.getStatus();
         body += importProgress;
-        
+
         body += "</br>------------------</br>";
 
         String url = request.getRequestURL().toString();

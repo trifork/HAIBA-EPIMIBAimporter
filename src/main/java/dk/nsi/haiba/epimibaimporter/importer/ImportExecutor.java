@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class ImportExecutor {
     public void run() {
         if (!isManualOverride()) {
             log.debug("Running Importer: " + new Date().toString());
-            doProcess();
+            doProcess(false);
         } else {
             log.debug("Importer must be started manually");
         }
@@ -96,11 +97,13 @@ public class ImportExecutor {
     /*
      * Separated into its own method for testing purpose, because testing a scheduled method isn't good
      */
-    public void doProcess() {
+    public void doProcess(boolean manual) {
         // Fetch new records from LPR contact table
         try {
             statusRepo.importStartedAt(new DateTime());
-            emailSender.sendHello();
+            if (manual) {
+                emailSender.sendHello();
+            }
             currentImportProgress.reset();
 
             // update tab tables first, in order to copy proper values into location/classification tables for used
@@ -174,9 +177,14 @@ public class ImportExecutor {
             Collection<String> banrInNewAnswers = haibaDao.getAllBanr();
             checkAndSendEmailOnNewImports(alnrInNewAnswers, banrInNewAnswers);
             currentImportProgress.addStatusLine("done");
-
+            if (manual) {
+                emailSender.sendDone(null);
+            }
             statusRepo.importEndedWithSuccess(new DateTime());
         } catch (Exception e) {
+            if (manual) {
+                emailSender.sendDone(ExceptionUtils.getStackTrace(e));
+            }
             log.error("", e);
             statusRepo.importEndedWithFailure(new DateTime(), e.getMessage());
         }
