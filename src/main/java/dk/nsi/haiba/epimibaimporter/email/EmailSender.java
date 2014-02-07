@@ -68,7 +68,7 @@ public class EmailSender {
             not_html += "-----\n";
             not_html += "alnr:\n";
             String delim = "";
-            for (String alnr : unknownAlnrSet) {
+            for (String alnr : alnrSet) {
                 not_html += delim + alnr;
                 delim = ", ";
             }
@@ -78,7 +78,7 @@ public class EmailSender {
             not_html += "-----\n";
             not_html += "banr:\n";
             String delim = "";
-            for (String banr : unknownBanrSet) {
+            for (String banr : banrSet) {
                 not_html += delim + banr;
                 delim = ", ";
             }
