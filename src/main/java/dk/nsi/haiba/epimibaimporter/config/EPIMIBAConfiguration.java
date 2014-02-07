@@ -83,9 +83,9 @@ public class EPIMIBAConfiguration {
     private String smtpHost;
     @Value("${smtp.port}")
     private int smtpPort;
-    @Value("${smtp.user}")
+    @Value("${smtp.user:}")
     private String smtpUser;
-    @Value("${smtp.password}")
+    @Value("${smtp.password:}")
     private String smtpPassword;
     @Value("${smtp.auth}")
     private boolean smtpAuth;
