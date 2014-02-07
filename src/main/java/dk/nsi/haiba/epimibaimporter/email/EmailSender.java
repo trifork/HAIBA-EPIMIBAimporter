@@ -120,7 +120,7 @@ public class EmailSender {
     public void sendHello() {
         if (sendHello) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            sendText("EPIMIBA: Import started at " + dateFormat.format(new Date()), "Have a nice day");
+            sendText("EPIMIBA: Import started at " + dateFormat.format(new Date()), "");
         }
     }
 
