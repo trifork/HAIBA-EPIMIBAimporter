@@ -182,11 +182,11 @@ public class ImportExecutor {
             }
             statusRepo.importEndedWithSuccess(new DateTime());
         } catch (Exception e) {
+            log.error("", e);
+            statusRepo.importEndedWithFailure(new DateTime(), e.getMessage());
             if (manual) {
                 emailSender.sendDone(ExceptionUtils.getStackTrace(e));
             }
-            log.error("", e);
-            statusRepo.importEndedWithFailure(new DateTime(), e.getMessage());
         }
     }
 
