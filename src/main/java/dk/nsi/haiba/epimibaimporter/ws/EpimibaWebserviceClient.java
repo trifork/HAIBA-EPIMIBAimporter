@@ -47,7 +47,6 @@ import dk.nsi.stamdata.jaxws.generated.WebService;
 import dk.nsi.stamdata.jaxws.generated.WebServiceSoap;
 
 public class EpimibaWebserviceClient {
-	
 	@Value("${epimiba.webservice.wsdl.url}")
 	String wsdlURL;
 
@@ -63,7 +62,6 @@ public class EpimibaWebserviceClient {
 	private static Log log = new Log(Logger.getLogger(EpimibaWebserviceClient.class));
 
     public List<Answer> getAnswers(long latestTransactionId, int caseDefinitionId) {
-    	
     	log.debug("Calling getanswers");
     	List<Answer> answerList = new ArrayList<Answer>();
     	
@@ -87,7 +85,6 @@ public class EpimibaWebserviceClient {
     }
 
 	private WebServiceSoap createWebserviceClient() throws Exception {
-		
 		URL wsdlLocation = new URL(wsdlURL);
 		QName serviceName = new QName("http://www.ssi.dk/", "WebService");
 		WebService ws = new WebService(wsdlLocation, serviceName);
@@ -96,7 +93,6 @@ public class EpimibaWebserviceClient {
 	}
     
     public List<Classification> getClassifications(String classificationType) {
-    	
     	log.debug("Calling getClassifications with type "+classificationType);
     	List<Classification> list = new ArrayList<Classification>();
     	
@@ -121,14 +117,10 @@ public class EpimibaWebserviceClient {
     }
 
     List<GenericCoding> getCodings(String codingsType) throws Exception {
-		
 		WebServiceSoap wsClient = createWebserviceClient();
 		GenericCodingResult codings = wsClient.getCodings(username, password, codingsType);
 		ArrayOfGenericCoding codes = codings.getCodes();
 		List<GenericCoding> genericCoding = codes.getGenericCoding();
 		return genericCoding;
 	}
-    
-
-
 }
