@@ -36,6 +36,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import dk.nsi.haiba.epimibaimporter.dao.ClassificationCheckDAO;
@@ -83,6 +84,9 @@ public class ImportExecutor {
     CurrentImportProgress currentImportProgress;
 
     private Comparator<? super Answer> aSortAnswersByTransactionIdComparator = new SortAnswersByTransactionIdComparator();
+
+    @Value("${import.testpatients:false}")
+    private boolean allowTestPt;
 
     @Scheduled(cron = "${cron.import.job}")
     public void run() {
@@ -147,8 +151,8 @@ public class ImportExecutor {
                     // transaction ids allows answers overtaking each other and potentially prohibiting fetching of all
                     // answers
                     Collections.sort(answers, aSortAnswersByTransactionIdComparator);
-                    String status = "read " + (answers != null ? answers.size() : 0) + " answers for "
-                            + caseDef.getText();
+                    String status = "read " + answers.size() + " answers for " + caseDef.getText();
+                    // write a dot if the same status is repeated over and over, else the new status
                     if (status.equals(lastStatus)) {
                         currentImportProgress.addProgressDot();
                     } else {
@@ -161,12 +165,11 @@ public class ImportExecutor {
                     } else {
                         log.debug("got " + answers.size());
                         for (Answer answer : answers) {
-                            log.debug(answer.getCprnr());
-                            if (answer.isTestPt() == null || !answer.isTestPt()) {
+                            if (allowTestPt || answer.isTestPt() == null || !answer.isTestPt()) {
                                 Header header = getHeader(answer);
                                 haibaDao.saveHeader(header, answer.getTransactionID().longValue(), caseDef.getId());
                             } else {
-                                log.debug("not saving header for test patient " + answer.getCprnr());
+                                log.debug("not saving header for test patient on transaction id " + answer.getTransactionID());
                             }
                         }
                     }
