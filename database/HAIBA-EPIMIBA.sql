@@ -98,14 +98,14 @@ CREATE TABLE IF NOT EXISTS EpimibaTransaction (
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
 -- other database
-CREATE TABLE IF NOT EXISTS Klass_microorganism (
+CREATE TABLE IF NOT EXISTS Anvendt_Klass_microorganism (
     TabmicroorganismId BIGINT(15) NOT NULL PRIMARY KEY,
     Banr varchar(50) NOT NULL,
     Text varchar(300) NULL,
     H_BAKT_MICRO float NULL
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS Klass_Location (
+CREATE TABLE IF NOT EXISTS Anvendt_Klass_Location (
     TabLocationId BIGINT(15) NOT NULL PRIMARY KEY,
     Alnr varchar(200) NOT NULL,
     Text varchar(300) NULL,

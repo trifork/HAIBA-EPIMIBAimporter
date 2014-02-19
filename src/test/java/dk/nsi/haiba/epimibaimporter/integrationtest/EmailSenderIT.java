@@ -113,10 +113,10 @@ public class EmailSenderIT {
 
     @Test
     public void testEmailSendOnNewEntries() {
-        int count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_microorganism");
-        assertEquals("Empty KlassMicroorganism", 0, count);
-        count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Location");
-        assertEquals("Empty KlassLocation", 0, count);
+        int count = jdbc.queryForInt("SELECT COUNT(*) FROM Anvendt_Klass_microorganism");
+        assertEquals("Empty Anvendt_Klass_microorganism", 0, count);
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Anvendt_Klass_Location");
+        assertEquals("Empty Anvendt_Klass_Location", 0, count);
 
         List<Answer> answers = new ArrayList<Answer>();
         Answer a = new Answer();
@@ -171,10 +171,10 @@ public class EmailSenderIT {
         Set<String> unknownAlnrSet = new HashSet<String>(Arrays.asList(new String[] { "1" }));
         Mockito.verify(emailSender, Mockito.times(1)).send(unknownBanrSet, unknownAlnrSet);
 
-        count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_microorganism");
-        assertEquals("Not Empty Klass_microorganism", 2, count);
-        count = jdbc.queryForInt("SELECT COUNT(*) FROM Klass_Location");
-        assertEquals("Not Empty Klass_Location", 1, count);
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Anvendt_Klass_microorganism");
+        assertEquals("Not Empty Anvendt_Klass_microorganism", 2, count);
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Anvendt_Klass_Location");
+        assertEquals("Not Empty Anvendt_Klass_Location", 1, count);
 
         System.out.println(currentImportProgress.getStatus());
         importExecutor.doProcess(true);

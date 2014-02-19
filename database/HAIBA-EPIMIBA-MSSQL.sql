@@ -93,14 +93,14 @@ CREATE TABLE EpimibaTransaction (
 );
 
 -- other database
-CREATE TABLE Klass_microorganism (
+CREATE TABLE Anvendt_Klass_microorganism (
     TabmicroorganismId BIGINT NOT NULL PRIMARY KEY,
     Banr varchar(50) NOT NULL,
     Text varchar(300) NULL,
     H_BAKT_MICRO float NULL
 );
 
-CREATE TABLE Klass_Location (
+CREATE TABLE Anvendt_Klass_Location (
     TabLocationId BIGINT NOT NULL PRIMARY KEY,
     Alnr varchar(50) NOT NULL,
     Text varchar(300) NULL,

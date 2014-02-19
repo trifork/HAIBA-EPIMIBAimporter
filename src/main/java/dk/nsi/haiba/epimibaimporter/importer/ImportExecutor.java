@@ -270,14 +270,14 @@ public class ImportExecutor {
 
     private final class MyBanrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
         public MyBanrClassificationCheckMapper() {
-            super("Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr", "Text" },
+            super("Anvendt_Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr", "Text" },
                     "Banr");
         }
     }
 
     private final class MyAlnrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
         public MyAlnrClassificationCheckMapper() {
-            super("Klass_Location", "TabLocation", new String[] { "TabLocationId", "Alnr", "Text" }, "Alnr");
+            super("Anvendt_Klass_Location", "TabLocation", new String[] { "TabLocationId", "Alnr", "Text" }, "Alnr");
         }
     }
 
