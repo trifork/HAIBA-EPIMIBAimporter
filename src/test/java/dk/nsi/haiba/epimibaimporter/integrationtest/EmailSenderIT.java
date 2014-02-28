@@ -43,7 +43,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -63,6 +62,7 @@ import dk.nsi.stamdata.jaxws.generated.Answer;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPIsolate;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPQuantitative;
 import dk.nsi.stamdata.jaxws.generated.PIsolate;
+import dk.nsi.stamdata.jaxws.generated.PQuantitative;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional("haibaTransactionManager")
@@ -112,7 +112,61 @@ public class EmailSenderIT {
     }
 
     @Test
+    public void testHeaderInserts() {
+        Logger.getLogger(ImportExecutor.class).setLevel(Level.ERROR);
+        int count = jdbc.queryForInt("SELECT COUNT(*) FROM Header");
+        assertEquals("Empty Header", 0, count);
+        int answerCount = 100;
+        List<Answer> answers = createAnswers(answerCount);
+
+        Mockito.when(epimibaWebserviceClient.getAnswers(1, 119)).thenReturn(answers);
+        long time = System.currentTimeMillis();
+        importExecutor.doProcess(true);
+        long period = System.currentTimeMillis() - time;
+
+        System.out.println("time to insert " + answerCount + " into headers: " + period / 1000d + " seconds");
+
+        Mockito.verify(epimibaWebserviceClient, Mockito.times(1)).getAnswers(1, 119);
+        count = jdbc.queryForInt("SELECT COUNT(*) FROM Header");
+        assertEquals("Not empty Header", answerCount, count);
+        Logger.getLogger(ImportExecutor.class).setLevel(Level.DEBUG);
+    }
+
+    private List<Answer> createAnswers(int answerCount) {
+        List<Answer> returnValue = new ArrayList<Answer>();
+        for (int i = 0; i < answerCount; i++) {
+            Answer a = new Answer();
+            a.setHeaderId(i);
+            a.setLocationAlnr("1");
+            a.setCprnr(i + "x");
+            a.setTransactionID(new BigInteger("" + 1 + i));
+
+            PIsolate pisolate = new PIsolate();
+            pisolate.setIsolateBanr(i % 10 + "");
+            PIsolate pisolate2 = new PIsolate();
+            pisolate2.setIsolateBanr((10 + (i % 10)) + "");
+            ArrayOfPIsolate arrayOfPIsolate = new ArrayOfPIsolate();
+            arrayOfPIsolate.getPIsolate().add(pisolate);
+            arrayOfPIsolate.getPIsolate().add(pisolate2);
+            a.setIsolates(arrayOfPIsolate);
+
+            PQuantitative quantitative = new PQuantitative();
+            quantitative.setQuantitativeQuantity("" + i * 2);
+            PQuantitative quantitative2 = new PQuantitative();
+            quantitative2.setQuantitativeQuantity("" + (i * 2 - 1));
+            ArrayOfPQuantitative quantitatives = new ArrayOfPQuantitative();
+            quantitatives.getPQuantitative().add(quantitative);
+            quantitatives.getPQuantitative().add(quantitative2);
+            a.setQuantitatives(quantitatives);
+
+            returnValue.add(a);
+        }
+        return returnValue;
+    }
+
+    @Test
     public void testEmailSendOnNewEntries() {
+        Mockito.reset(emailSender);
         int count = jdbc.queryForInt("SELECT COUNT(*) FROM Anvendt_Klass_microorganism");
         assertEquals("Empty Anvendt_Klass_microorganism", 0, count);
         count = jdbc.queryForInt("SELECT COUNT(*) FROM Anvendt_Klass_Location");
