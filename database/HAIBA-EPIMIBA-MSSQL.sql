@@ -15,6 +15,7 @@ CREATE TABLE Header (
        Stnr varchar(50),
        Avd varchar(50),
        Mgkod varchar(300),
+       CommentText varchar(500),
        HAIBACaseDef char(4),
 );
 

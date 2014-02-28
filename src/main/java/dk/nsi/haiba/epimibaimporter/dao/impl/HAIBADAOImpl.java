@@ -73,18 +73,18 @@ public class HAIBADAOImpl extends CommonDAO implements HAIBADAO {
                 log.debug("* Updating Header for caseDef " + caseDef);
                 sql = "UPDATE "
                         + haibaTablePrefix
-                        + "Header set Cprnr=?, Extid=?, Refnr=?, Labnr=?, Lar=?, Pname=?, Indate=?, Prdate=?, Result=?, Evaluation=?, Usnr=?, Alnr=?, Stnr=?, Avd=?, Mgkod=?, HAIBACaseDef=? where HeaderId=?";
+                        + "Header set Cprnr=?, Extid=?, Refnr=?, Labnr=?, Lar=?, Pname=?, Indate=?, Prdate=?, Result=?, Evaluation=?, Usnr=?, Alnr=?, Stnr=?, Avd=?, Mgkod=?, CommentText=?, HAIBACaseDef=? where HeaderId=?";
             } else {
                 log.debug("* Inserting Header");
                 sql = "INSERT INTO "
                         + haibaTablePrefix
-                        + "Header (Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, Evaluation, Usnr, Alnr, Stnr, Avd, Mgkod, HAIBACaseDef, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        + "Header (Cprnr, Extid, Refnr, Labnr, Lar, Pname, Indate, Prdate, Result, Evaluation, Usnr, Alnr, Stnr, Avd, Mgkod, CommentText, HAIBACaseDef, HeaderId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
 
             Object[] args = new Object[] { header.getCprnr(), header.getExtid(), header.getRefnr(), header.getLabnr(),
                     header.getLar(), header.getPname(), header.getInDate(), header.getPrDate(), header.getResult(),
                     header.getEvaluationText(), header.getUsnr(), header.getAlnr(), header.getStnr(), header.getAvd(),
-                    header.getMgkod(), header.getCaseDef(), header.getHeaderId() };
+                    header.getMgkod(), header.getCommentText(), header.getCaseDef(), header.getHeaderId()};
 
             jdbc.update(sql, args);
 

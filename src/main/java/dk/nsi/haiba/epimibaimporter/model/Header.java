@@ -50,6 +50,7 @@ public class Header {
 	String caseDef;
     List<Isolate> isolates = new ArrayList<Isolate>();
 	List<Quantitative> quantitatives = new ArrayList<Quantitative>();
+    private String commentText;
 	
 	public String getCaseDef() {
 	    return caseDef;
@@ -173,5 +174,12 @@ public class Header {
 	public void addQuantitative(Quantitative quantitative) {
 		quantitatives.add(quantitative);
 	}
+    public void setCommentText(String commentText) {
+        this.commentText = commentText;
+    }
+    
+    public String getCommentText() {
+        return commentText;
+    }
 	
 }

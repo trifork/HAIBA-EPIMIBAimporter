@@ -52,8 +52,10 @@ import dk.nsi.haiba.epimibaimporter.status.CurrentImportProgress;
 import dk.nsi.haiba.epimibaimporter.status.ImportStatusRepository;
 import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
 import dk.nsi.stamdata.jaxws.generated.Answer;
+import dk.nsi.stamdata.jaxws.generated.ArrayOfPComment;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPIsolate;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPQuantitative;
+import dk.nsi.stamdata.jaxws.generated.PComment;
 import dk.nsi.stamdata.jaxws.generated.PIsolate;
 import dk.nsi.stamdata.jaxws.generated.PQuantitative;
 
@@ -166,10 +168,11 @@ public class ImportExecutor {
                         log.debug("got " + answers.size());
                         for (Answer answer : answers) {
                             if (allowTestPt || answer.isTestPt() == null || !answer.isTestPt()) {
-                                Header header = getHeader(answer);
+                                Header header = getHeader(answer, caseDef.getId());
                                 haibaDao.saveHeader(header, answer.getTransactionID().longValue(), caseDef.getId());
                             } else {
-                                log.debug("not saving header for test patient on transaction id " + answer.getTransactionID());
+                                log.debug("not saving header for test patient on transaction id "
+                                        + answer.getTransactionID());
                             }
                         }
                     }
@@ -207,8 +210,10 @@ public class ImportExecutor {
         }
     }
 
-    private Header getHeader(Answer answer) {
+    private Header getHeader(Answer answer, int caseDef) {
         Header h = new Header();
+        h.setCommentText(getCommentText(answer));
+        h.setCaseDef("" + caseDef);
         h.setHeaderId(answer.getHeaderId());
         h.setAlnr(answer.getLocationAlnr());
         h.setAvd(answer.getAvd());
@@ -260,6 +265,24 @@ public class ImportExecutor {
         return h;
     }
 
+    private String getCommentText(Answer answer) {
+        String returnValue = null;
+        ArrayOfPComment comments = answer.getComments();
+        if (comments != null) {
+            List<PComment> pComments = comments.getPComment();
+            if (pComments != null) {
+                for (PComment pComment : pComments) {
+                    if (returnValue != null) {
+                        returnValue += ", " + pComment.getCommentText();
+                    } else {
+                        returnValue = pComment.getCommentText();
+                    }
+                }
+            }
+        }
+        return returnValue;
+    }
+
     public boolean isManualOverride() {
         return manualOverride;
     }
@@ -270,8 +293,8 @@ public class ImportExecutor {
 
     private final class MyBanrClassificationCheckMapper extends DefaultClassificationCheckDAOColumnMapper {
         public MyBanrClassificationCheckMapper() {
-            super("Anvendt_Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr", "Text" },
-                    "Banr");
+            super("Anvendt_Klass_microorganism", "Tabmicroorganism", new String[] { "TabmicroorganismId", "Banr",
+                    "Text" }, "Banr");
         }
     }
 
