@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Header (
        Stnr varchar(50),
        Avd varchar(50),
        Mgkod varchar(300),
-       CommentText varchar(500),
+       CommentText varchar(2000),
        HAIBACaseDef char(4)
 ) ENGINE=InnoDB COLLATE=utf8_bin;
 
