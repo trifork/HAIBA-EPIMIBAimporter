@@ -27,6 +27,8 @@
 package dk.nsi.haiba.epimibaimporter.integrationtest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -59,8 +61,10 @@ import dk.nsi.haiba.epimibaimporter.model.Classification;
 import dk.nsi.haiba.epimibaimporter.status.CurrentImportProgress;
 import dk.nsi.haiba.epimibaimporter.ws.EpimibaWebserviceClient;
 import dk.nsi.stamdata.jaxws.generated.Answer;
+import dk.nsi.stamdata.jaxws.generated.ArrayOfPComment;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPIsolate;
 import dk.nsi.stamdata.jaxws.generated.ArrayOfPQuantitative;
+import dk.nsi.stamdata.jaxws.generated.PComment;
 import dk.nsi.stamdata.jaxws.generated.PIsolate;
 import dk.nsi.stamdata.jaxws.generated.PQuantitative;
 
@@ -129,6 +133,11 @@ public class EmailSenderIT {
         Mockito.verify(epimibaWebserviceClient, Mockito.times(1)).getAnswers(1, 119);
         count = jdbc.queryForInt("SELECT COUNT(*) FROM Header");
         assertEquals("Not empty Header", answerCount, count);
+        
+        String commentText = jdbc.queryForObject("SELECT CommentText FROM Header LIMIT 1", String.class);
+        assertNotNull(commentText);
+        assertTrue(commentText.contains("///"));
+        
         Logger.getLogger(ImportExecutor.class).setLevel(Level.DEBUG);
     }
 
@@ -158,6 +167,15 @@ public class EmailSenderIT {
             quantitatives.getPQuantitative().add(quantitative);
             quantitatives.getPQuantitative().add(quantitative2);
             a.setQuantitatives(quantitatives);
+            
+            ArrayOfPComment arrayOfPComment = new ArrayOfPComment();
+            PComment pComment = new PComment();
+            pComment.setCommentText("1");
+            arrayOfPComment.getPComment().add(pComment);
+            pComment = new PComment();
+            pComment.setCommentText("2");
+            arrayOfPComment.getPComment().add(pComment);
+            a.setComments(arrayOfPComment);
 
             returnValue.add(a);
         }
