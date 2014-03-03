@@ -273,7 +273,7 @@ public class ImportExecutor {
             if (pComments != null) {
                 for (PComment pComment : pComments) {
                     if (returnValue != null) {
-                        returnValue += ", " + pComment.getCommentText();
+                        returnValue += "///" + pComment.getCommentText();
                     } else {
                         returnValue = pComment.getCommentText();
                     }
